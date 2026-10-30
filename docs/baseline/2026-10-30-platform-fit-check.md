@@ -135,3 +135,21 @@ Files download to the owner's computer and are moved into the Drive folder by th
 Custom widget #8 is left **disabled, not deleted** (nothing is deleted under Build Scope 29). How to roll back any widget change: Toolbox › Widget Manager › search the widget › Actions › Disable Widget; the default returns within about a minute.
 
 **Test members:** not created. Creating member accounts on the live site is a step the owner does himself; the four accounts to create are "TD Test – Basic", "TD Test – Featured", "TD Test – Premium" and "TD Test – Growth" (the Growth plan does not exist yet, so that one waits for T06).
+
+## Key facts without JavaScript (Build Scope 35.3, added to T01 on 30 October 2026)
+
+20 profiles, two from each of the first top-level categories that link to profiles, fetched as raw HTML with every script removed (what an AI crawler or a reader with JavaScript off receives). 30 October 2026, 06:15 UK.
+
+| Key fact | In the raw HTML | Note |
+| --- | --- | --- |
+| Name | 20 of 20 | H1 |
+| What it does | 20 of 20 | About text or meta description |
+| Services / specialties | 17 of 20 | The 3 without have no specialties filled in |
+| Location | 20 of 20 | Address text and LocalBusiness structured data |
+| Rating | 4 of 20 | Only profiles that have reviews; none load by script |
+| Checked date | 0 of 20 | The "Business details checked · date" label does not exist yet (T18) |
+| Prices from | 0 of 20 | No pricing-guide field yet (T11) |
+
+**Result:** nothing on the profiles depends on JavaScript; the gaps are missing data, not script loading. T11 adds the checked date and prices-from fields in the page HTML.
+
+The sample also shows the data problem from the GA4 baseline: profiles for a betting site ("12bet"), an Indonesian slot-gambling site, an essay-writing service and several "news" pages sit in technology categories. B02 and B17 deal with them.
