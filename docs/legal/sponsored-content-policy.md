@@ -1,8 +1,8 @@
-# DRAFT for owner approval · Sponsored content policy and refunds
+# Sponsored content policy and refunds · approved by the owner, 30 October 2026
 
 To be published at **techdirectory.io/sponsored-content-policy** and linked from the /sponsored-post order page, the checkout step and the footer (Build Scope 4.1, 28). B46 takes no sale until the owner has approved this text and it is live.
 
-This is a working draft written from Build Scope 28, not legal advice. Items in [square brackets] need the owner's details. A UK solicitor review is recommended when the self-funding ladder allows.
+Approved by the owner on 30 October 2026 for publication at /sponsored-content-policy. Written from Build Scope 28; not legal advice. A UK solicitor review is recommended when the self-funding ladder allows.
 
 ---
 
