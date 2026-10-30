@@ -12,6 +12,7 @@
 window.TD_SP_CONFIG = {
   orderEndpoint: "",            /* order-intake automation URL; empty = page shows "opening soon" */
   prices: { USD: "$199", GBP: "£159", EUR: "€185" },
+  prPrices: { USD: "$349", GBP: "£279", EUR: "€325" },   /* press release = Announcement Plus (approved price) */
   policyUrl: "/sponsored-content-policy",
   categories: [
     ["artificial-intelligence", "Artificial intelligence"], ["cybersecurity", "Cybersecurity"],
@@ -71,12 +72,23 @@ window.TD_SP_CONFIG = {
 <div class="td-sp">
   <div class="td-sp__wrap">
     <main>
-      <h1>Publish a sponsored post</h1>
-      <p class="td-sp__lead">Write your article here, check it against our publishing rules as you go, then pay. If it passes every check, it goes live within minutes.</p>
+      <h1>Publish a sponsored post or press release</h1>
+      <p class="td-sp__lead">Write or paste it here, check it against our publishing rules as you go, then pay. If it passes every check, it goes live within minutes.</p>
 
       <div id="td-sp-status" class="td-sp__status td-sp__status--info" role="status" hidden></div>
 
       <form id="td-sp-form" novalidate>
+        <section class="td-sp__panel" aria-labelledby="td-sp-what">
+          <h2 id="td-sp-what">What are you publishing?</h2>
+          <fieldset style="border:0;padding:0;margin:0">
+            <legend class="hint" style="padding:0;margin-bottom:8px">Choose one</legend>
+            <label class="td-sp__consent" style="margin-bottom:8px"><input type="radio" name="product" value="article" checked>
+              <span><b>Sponsored article</b>, <span data-td-price-article>$199</span>: an article written for TechDirectory, 100% unique, at least 500 words (1,000 or more recommended).</span></label>
+            <label class="td-sp__consent"><input type="radio" name="product" value="press-release">
+              <span><b>Press release</b>, <span data-td-price-pr>$349</span>: your company's own news. It may already be published elsewhere; you add a short summary written for TechDirectory. At least 300 words.</span></label>
+          </fieldset>
+        </section>
+
         <section class="td-sp__panel" aria-labelledby="td-sp-you">
           <h2 id="td-sp-you">About you</h2>
           <div class="td-sp__row">
@@ -90,14 +102,19 @@ window.TD_SP_CONFIG = {
         </section>
 
         <section class="td-sp__panel" aria-labelledby="td-sp-article">
-          <h2 id="td-sp-article">Your article</h2>
+          <h2 id="td-sp-article"><span data-td-kind-cap>Your article</span></h2>
           <div class="td-sp__field"><label for="sp-title">Title</label><input id="sp-title" name="title" type="text" maxlength="120" required></div>
           <div class="td-sp__field">
             <label for="sp-category">Category</label>
             <select id="sp-category" name="category" required><option value="">Choose a technology category</option></select>
           </div>
+          <div class="td-sp__field" id="sp-summary-field" hidden>
+            <label for="sp-summary">Summary for TechDirectory <span class="hint">2–3 sentences, at least 40 words, in your own words (not copied from the release). It appears at the top as "In short" and in search results.</span></label>
+            <textarea id="sp-summary" name="summary" rows="4" maxlength="900" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:inherit"></textarea>
+            <p class="td-sp__note" style="margin-top:6px"><span id="sp-summary-count">0</span> words</p>
+          </div>
           <div class="td-sp__field">
-            <label id="sp-body-label">Article <span class="hint">at least 500 words (1,000 or more recommended) of 100% unique content, up to 2 links to your own site, at least one subheading</span></label>
+            <label id="sp-body-label"><span data-td-body-label>Article</span> <span class="hint" data-td-body-hint>at least 500 words (1,000 or more recommended) of 100% unique content, up to 2 links to your own site, at least one subheading</span></label>
             <div id="td-sp-editor" aria-labelledby="sp-body-label"></div>
             <div class="td-sp__meter" aria-live="polite">
               <span id="sp-words" class="td-sp__pill td-sp__pill--warn">0 words</span>
@@ -136,7 +153,7 @@ window.TD_SP_CONFIG = {
 
         <section class="td-sp__panel">
           <label class="td-sp__consent"><input id="sp-consent" type="checkbox" required>
-            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. My article is 100% unique and not published anywhere else, I have the right to use its image, and I understand it will be labelled "Sponsored".</span></label>
+            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. <span data-td-consent>My article is 100% unique and not published anywhere else, I have the right to use its image, and I understand it will be labelled "Sponsored".</span></span></label>
           <p id="sp-form-error" class="td-sp__error" role="alert"></p>
           <button id="sp-submit" class="td-sp__btn" type="submit"><span>Pay <span data-td-price>$199</span> and submit</span></button>
           <p class="td-sp__note"><b>Refunds.</b> If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>.</p>
@@ -146,7 +163,7 @@ window.TD_SP_CONFIG = {
 
     <aside class="td-sp__aside">
       <div class="td-sp__panel">
-        <span class="td-sp__label">Sponsored</span>
+        <span class="td-sp__label" data-td-kind-label>Sponsored article</span>
         <div class="td-sp__price" data-td-price>$199</div>
         <p style="margin:0" class="hint">per post, before tax, paid upfront</p>
         <p style="margin:12px 0 0"><label for="sp-currency" style="display:inline;font-weight:400">Currency</label>
@@ -179,14 +196,34 @@ window.TD_SP_CONFIG = {
   cfg.categories.forEach(function (c) { var o = document.createElement("option"); o.value = c[0]; o.textContent = c[1]; $("sp-category").appendChild(o); });
 
   /* currency: visitor's choice, kept for this visitor only */
+  function product() { var el = document.querySelector('input[name="product"]:checked'); return el ? el.value : "article"; }
+  var COPY = {
+    "article": { cap: "Your article", body: "Article", hint: "at least 500 words (1,000 or more recommended) of 100% unique content, up to 2 links to your own site, at least one subheading",
+      consent: 'My article is 100% unique and not published anywhere else, I have the right to use its image, and I understand it will be labelled "Sponsored".', label: "Sponsored article" },
+    "press-release": { cap: "Your press release", body: "Press release", hint: "at least 300 words, your company's own news (it may already be published elsewhere), up to 2 links to your own site",
+      consent: 'This is my company\u2019s own press release, the summary is written for TechDirectory, I have the right to use the image, and I understand it will be labelled "Press release".', label: "Press release" }
+  };
+  function setProduct() {
+    var c = COPY[product()];
+    document.querySelectorAll("[data-td-kind-cap]").forEach(function (el) { el.textContent = c.cap; });
+    document.querySelectorAll("[data-td-body-label]").forEach(function (el) { el.textContent = c.body; });
+    document.querySelectorAll("[data-td-body-hint]").forEach(function (el) { el.textContent = c.hint; });
+    document.querySelectorAll("[data-td-consent]").forEach(function (el) { el.textContent = c.consent; });
+    document.querySelectorAll("[data-td-kind-label]").forEach(function (el) { el.textContent = c.label; });
+    $("sp-summary-field").hidden = product() !== "press-release";
+    setCurrency($("sp-currency").value);
+  }
   function setCurrency(cur) {
-    var p = cfg.prices[cur] || cfg.prices.USD;
+    var p = (product() === "press-release" ? cfg.prPrices : cfg.prices)[cur] || cfg.prices.USD;
     document.querySelectorAll("[data-td-price]").forEach(function (el) { el.textContent = p; });
+    document.querySelectorAll("[data-td-price-article]").forEach(function (el) { el.textContent = cfg.prices[cur] || cfg.prices.USD; });
+    document.querySelectorAll("[data-td-price-pr]").forEach(function (el) { el.textContent = cfg.prPrices[cur] || cfg.prPrices.USD; });
     try { localStorage.setItem("td-currency", cur); } catch (e) {}
   }
   var cur0 = "USD"; try { cur0 = localStorage.getItem("td-currency") || "USD"; } catch (e) {}
   $("sp-currency").value = cur0; setCurrency(cur0);
   $("sp-currency").addEventListener("change", function () { setCurrency(this.value); });
+  document.querySelectorAll('input[name="product"]').forEach(function (el) { el.addEventListener("change", function () { setProduct(); if (typeof evaluate === "function") evaluate(); }); });
 
   var quill = new Quill("#td-sp-editor", {
     theme: "snow",
@@ -201,16 +238,19 @@ window.TD_SP_CONFIG = {
   function domains() { try { return [new URL($("sp-site").value).hostname.replace(/^www\./, "")]; } catch (e) { return []; } }
 
   function evaluate() {
+    var isPR = product() === "press-release";
     var r = TDSponsoredChecks.run({ title: $("sp-title").value, html: articleHtml(), category: $("sp-category").value,
-      metaDescription: $("sp-desc").value, tags: tagList(),
+      metaDescription: $("sp-desc").value, tags: tagList(), type: product(), summary: $("sp-summary").value,
       buyerDomains: domains(), image: imageInfo, network: null, history: { refusals12m: 0 } }, DOMPurify);
     var wEl = $("sp-words"), lEl = $("sp-links");
     wEl.textContent = r.words.toLocaleString("en-GB") + " words";
-    wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= 1000 && r.words <= 3000 ? "ok" : (r.words < 500 || r.words > 4000) ? "bad" : "warn");
+    var good = isPR ? 300 : 1000, min = isPR ? 300 : 500;
+    wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= good && r.words <= 3000 ? "ok" : (r.words < min || r.words > 4000) ? "bad" : "warn");
+    $("sp-summary-count").textContent = ($("sp-summary").value.trim().match(/\S+/g) || []).length;
     lEl.textContent = r.links.length + " of 2 links";
     lEl.className = "td-sp__pill td-sp__pill--" + (r.links.length <= 2 ? "ok" : "bad");
     $("sp-desc-count").textContent = r.metaDescription.length;
-    $("sp-desc-auto").textContent = $("sp-desc").value.trim() ? "" : (r.metaDescription ? "(using your first paragraph: \u201c" + r.metaDescription.replace(/[<>&]/g, "") + "\u201d)" : "");
+    $("sp-desc-auto").textContent = $("sp-desc").value.trim() ? "" : (r.metaDescription ? "(using your " + (isPR ? "summary" : "first paragraph") + ": \u201c" + r.metaDescription.replace(/[<>&]/g, "") + "\u201d)" : "");
     var shown = r.checks.filter(function (c) { return c.id !== "safety" && c.id !== "originality" && c.id !== "history"; });
     var labels = { pass: ["ok", "Passes"], borderline: ["warn", "Needs a look"], fail: ["bad", "Will be refused"] };
     $("td-sp-checks").innerHTML = shown.map(function (c) {
@@ -225,7 +265,7 @@ window.TD_SP_CONFIG = {
   function saveDraft() {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({ desc: $("sp-desc").value, tags: $("sp-tags").value, title: $("sp-title").value, category: $("sp-category").value, html: articleHtml(),
-        name: $("sp-name").value, email: $("sp-email").value, company: $("sp-company").value, website: $("sp-site").value, alt: $("sp-alt").value }));
+        name: $("sp-name").value, email: $("sp-email").value, company: $("sp-company").value, website: $("sp-site").value, alt: $("sp-alt").value, summary: $("sp-summary").value, product: product() }));
       $("sp-saved").textContent = "Draft saved in this browser";
     } catch (e) {}
   }
@@ -234,13 +274,16 @@ window.TD_SP_CONFIG = {
     if (d) { ["title", "category", "name", "email", "company"].forEach(function (k) { if (d[k]) $("sp-" + k).value = d[k]; });
       if (d.website) $("sp-site").value = d.website; if (d.alt) $("sp-alt").value = d.alt;
       if (d.desc) $("sp-desc").value = d.desc; if (d.tags) $("sp-tags").value = d.tags;
+      if (d.summary) $("sp-summary").value = d.summary;
+      if (d.product === "press-release") { document.querySelector('input[name="product"][value="press-release"]').checked = true; }
       if (d.html) quill.clipboard.dangerouslyPasteHTML(DOMPurify.sanitize(d.html)); }
   } catch (e) {}
 
   var t;
   function changed() { clearTimeout(t); t = setTimeout(function () { evaluate(); saveDraft(); }, 300); }
   quill.on("text-change", changed);
-  ["sp-title", "sp-category", "sp-site", "sp-name", "sp-email", "sp-company", "sp-alt", "sp-desc", "sp-tags"].forEach(function (id) { $(id).addEventListener("input", changed); });
+  ["sp-title", "sp-category", "sp-site", "sp-name", "sp-email", "sp-company", "sp-alt", "sp-desc", "sp-tags", "sp-summary"].forEach(function (id) { $(id).addEventListener("input", changed); });
+  setProduct();
 
   $("sp-image").addEventListener("change", function () {
     var f = this.files && this.files[0], msg = $("sp-image-msg");
@@ -277,6 +320,7 @@ window.TD_SP_CONFIG = {
     fd.append("website", $("sp-site").value); fd.append("title", $("sp-title").value); fd.append("category", $("sp-category").value);
     fd.append("html", r.cleanHtml); fd.append("metaDescription", r.metaDescription); fd.append("tags", r.tags.join(",")); fd.append("imageAlt", $("sp-alt").value); fd.append("image", imageInfo.file);
     fd.append("currency", $("sp-currency").value); fd.append("policyAccepted", new Date().toISOString());
+    fd.append("product", product()); fd.append("summary", $("sp-summary").value);
     fetch(cfg.orderEndpoint, { method: "POST", body: fd }).then(function (res) { return res.json(); }).then(function (j) {
       if (j && j.checkoutUrl) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} window.location.href = j.checkoutUrl; }
       else { var e = new Error("no checkout"); e.userMessage = j && j.message; throw e; }

@@ -20,9 +20,9 @@ TechDirectory, 71-75 Shelton Street, London WC2H 9JQ. Our full company details a
 
 | | |
 | --- | --- |
-| Price | $199, £159 or €185 per post, before any tax, paid in full when you order |
+| Price | Sponsored article: $199, £159 or €185. Press release: $349, £279 or €325. Before any tax, paid in full when you order |
 | What is published | One article of at least 500 words (1,000 or more recommended, up to 3,000), 100% unique, that you write, with a featured image you have the right to use |
-| Label | Every post shows "Sponsored" above the title and "Sponsored by [your company]" as the byline. It is never presented as TechDirectory's own writing |
+| Label | Articles show "Sponsored" above the title and "Sponsored by [your company]" as the byline; press releases show "Press release" and "Press release from [your company]". Neither is ever presented as TechDirectory's own writing |
 | Links | Up to 2 links to your own websites. Every link carries `rel="sponsored"`, as Google requires for paid links. We do not sell links without this attribute |
 | How long it stays | At least 12 months from publication. After that it normally stays online for as long as the site runs, unless it breaks this policy or its links stop working |
 | Volume | We publish at most 15 sponsored posts a week. If a week is full, your post is scheduled for the next free slot and we tell you the date |
@@ -33,8 +33,9 @@ Sponsored posts are sold to businesses only. You must give your company name whe
 
 ### What a post must be
 
-- 100% unique: not published anywhere else, including your own site, and not published elsewhere afterwards. A press release already sent out must be rewritten.
-- At least 500 words; 1,000 or more is recommended.
+- **Sponsored articles:** 100% unique, meaning not published anywhere else, including your own site, and not published elsewhere afterwards. At least 500 words; 1,000 or more is recommended.
+- **Press releases:** your company's own news. The release may already be published elsewhere, including on newswires and your own site. You add a summary of 2–3 sentences (at least 40 words) written for TechDirectory, which appears at the top as "In short". At least 300 words. You may not submit someone else's news.
+- Either way, the same text can't be published on TechDirectory twice.
 - About a technology or business-technology topic that is relevant to people who buy technology for their organisations.
 - Accurate. No claims you cannot support, no claims about other named companies, and no fake reviews or testimonials.
 - Mainly useful to the reader, not written mainly to carry links.
@@ -103,4 +104,4 @@ The owner asked the builder to make these calls. All points are decided.
 3. **Full refund if we remove a post within 12 months** for our own reasons: decided, yes. We promise 12 months, so breaking that must cost us, not the buyer.
 4. **One free correction within 30 days**: decided, yes. Typos and broken links to the buyer's own site only; costs minutes and avoids disputes.
 5. **Business buyers only**: decided, yes. Keeps consumer cancellation rights and foreign VAT out of scope.
-6. **100% unique, at least 500 words, 1,000 or more recommended, up to 3,000** (owner, 30 October): not published anywhere else, including the buyer's own site. The buyer confirms with the tick box; TechDirectory checks that the same text hasn't been submitted to it before. There is no web-wide copied-text check (Copyscape) until revenue allows; a post found to be copied is removed without a refund.
+6. **Articles: 100% unique, at least 500 words, 1,000 or more recommended, up to 3,000. Press releases (added the same day): the company's own news, may already be published elsewhere, a 40-word-plus summary written for TechDirectory, at least 300 words, $349 / £279 / €325 (Announcement Plus price).** For articles: (owner, 30 October): not published anywhere else, including the buyer's own site. The buyer confirms with the tick box; TechDirectory checks that the same text hasn't been submitted to it before. There is no web-wide copied-text check (Copyscape) until revenue allows; a post found to be copied is removed without a refund.

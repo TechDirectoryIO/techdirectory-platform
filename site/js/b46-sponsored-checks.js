@@ -32,6 +32,9 @@
 
   var RULES = {
     words: { pass: [500, 3000], hardBelow: 500, hardAbove: 4000, recommended: 1000 },   // owner, 30 Oct 2026: at least 500, 1,000+ recommended
+    /* Press releases (owner, 30 Oct 2026): may already be published elsewhere, but must be the company's own
+       news, carry a summary written for TechDirectory, and run to at least 300 words. */
+    pressRelease: { words: { pass: [300, 3000], hardBelow: 300, hardAbove: 4000 }, summaryMinWords: 40, summaryMaxWords: 100 },
     maxLinks: 2,
     wordsPerLink: 250,
     anchorMaxWords: 5,
@@ -132,15 +135,27 @@
     else if (s.hadStyles) add("html", "Clean HTML", "borderline", "Inline styles and classes were removed");
     else add("html", "Clean HTML", "pass", "");
 
+    var isPR = input.type === "press-release";
     var body = textOf(s.html);
     var w = words(body);
     var n = w.length;
-    var R = RULES.words;
+    var R = isPR ? RULES.pressRelease.words : RULES.words;
+    var min = R.hardBelow.toLocaleString("en-GB");
 
     /* Length */
-    if (n < R.hardBelow || n > R.hardAbove) add("length", "Length", "fail", n + " words (500–3,000 accepted)");
+    if (n < R.hardBelow || n > R.hardAbove) add("length", "Length", "fail", n + " words (" + min + "–3,000 accepted)");
     else if (n < R.pass[0] || n > R.pass[1]) add("length", "Length", "borderline", n + " words (over 3,000 is checked by hand)");
-    else add("length", "Length", "pass", n + " words" + (n < R.recommended ? " (1,000 or more recommended)" : ""));
+    else add("length", "Length", "pass", n + " words" + (!isPR && n < RULES.words.recommended ? " (1,000 or more recommended)" : ""));
+
+    /* Press release: a summary written for TechDirectory (2–3 sentences, 40+ words, not copied from the release) */
+    if (isPR) {
+      var PR = RULES.pressRelease, sum = String(input.summary || "").replace(/\s+/g, " ").trim(), sw = words(sum).length;
+      var norm = function (x) { return words(x).join(" "); };
+      if (sw < PR.summaryMinWords) add("summary", "Summary for TechDirectory", "fail", sw + " words (write at least " + PR.summaryMinWords + " in your own words for this page)");
+      else if (sw > PR.summaryMaxWords) add("summary", "Summary for TechDirectory", "borderline", sw + " words (" + PR.summaryMaxWords + " or fewer works best)");
+      else if (norm(body).indexOf(norm(sum)) !== -1) add("summary", "Summary for TechDirectory", "fail", "Copied from the release; write it fresh for this page");
+      else add("summary", "Summary for TechDirectory", "pass", sw + " words");
+    }
 
     /* Links */
     var links = linksIn(s.html);
@@ -216,14 +231,14 @@
     var imgW = input.image && input.image.width;
     var issues = [];
     if (!english) issues.push("may not be in English");
-    if (!headings) issues.push("no subheading");
+    if (!headings && !isPR) issues.push("no subheading");
     if (!(imgW >= RULES.minImageWidth)) issues.push("featured image narrower than 1,200 px");
     add("format", "Language and format", issues.length ? "borderline" : "pass", issues.join("; "));
 
     /* Search and AI summary: title, meta description and tags */
     var S = RULES.seo, seoIssues = [];
     var firstPara = textOf((s.html.match(/<p>([\s\S]*?)<\/p>/i) || [])[1] || "");
-    var desc = String(input.metaDescription || "").trim() || autoDescription(firstPara, S.descMax - 5);
+    var desc = String(input.metaDescription || "").trim() || autoDescription(isPR && input.summary ? String(input.summary) : firstPara, S.descMax - 5);
     if ((input.title || "").length > S.titleMax) seoIssues.push("title longer than " + S.titleMax + " characters (may be cut off in search results)");
     if (desc.length < S.descMin || desc.length > S.descMax) seoIssues.push("search summary is " + desc.length + " characters (70–160 works best)");
     if (!tags.length) seoIssues.push("no topic tags");
@@ -239,7 +254,8 @@
 
     var result = checks.some(function (c) { return c.result === "fail"; }) ? "fail"
       : checks.some(function (c) { return c.result === "borderline"; }) ? "borderline" : "pass";
-    return { result: result, checks: checks, cleanHtml: s.html, words: n, links: links,
+    return { result: result, checks: checks, cleanHtml: s.html, words: n, links: links, type: isPR ? "press-release" : "article",
+             summary: isPR ? String(input.summary || "").replace(/\s+/g, " ").trim() : "",
              metaDescription: desc, tags: tags.slice(0, S.maxTags) };
   }
 

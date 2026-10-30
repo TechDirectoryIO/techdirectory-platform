@@ -20,6 +20,9 @@ import Markup from "../../../../site/js/b46-post-markup.js";
 import { workerSanitizer } from "./sanitizer.js";
 
 const CURRENCIES = { USD: "PRICE_USD", GBP: "PRICE_GBP", EUR: "PRICE_EUR" };
+// Press releases (owner, 30 Oct 2026) are sold as Announcement Plus at $349 / £279 / €325 (approved price).
+const priceVar = (type, cur) => (type === "press-release" ? "PRICE_PR_" : "PRICE_") + cur;
+const KIND = { article: "sponsored post", "press-release": "press release" };
 const MAX_IMAGE = 2 * 1024 * 1024;
 const RESERVE_MINUTES = 35; // Stripe Checkout link lives 30 minutes
 
@@ -60,6 +63,7 @@ async function handleOrder(request, env) {
     metaDescription: f("metaDescription"),
     tags: f("tags").split(",").map((t) => t.trim()).filter(Boolean).slice(0, 5),
     imageAlt: f("imageAlt"), currency: f("currency").toUpperCase() || "USD", policyAccepted: f("policyAccepted"),
+    type: f("product") === "press-release" ? "press-release" : "article", summary: f("summary"),
   };
 
   const missing = ["name", "email", "company", "website", "title", "category", "html", "policyAccepted"].filter((k) => !order[k]);
@@ -68,7 +72,7 @@ async function handleOrder(request, env) {
   let site;
   try { site = new URL(order.website); } catch { site = null; }
   if (!site || site.protocol !== "https:") return json({ error: "website", message: "Your website must start with https://" }, 400);
-  if (!CURRENCIES[order.currency] || !env[CURRENCIES[order.currency]]) return json({ error: "currency", message: "Please choose USD, GBP or EUR." }, 400);
+  if (!CURRENCIES[order.currency] || !env[priceVar(order.type, order.currency)]) return json({ error: "currency", message: "Please choose USD, GBP or EUR." }, 400);
 
   const image = fd.get("image");
   let imageInfo = null;
@@ -92,8 +96,8 @@ async function handleOrder(request, env) {
     }
   }
 
-  if (!(await reservePlace(env))) {
-    return json({ error: "full", message: "This week's sponsored-post places are taken. New places open on Monday; your draft is saved." }, 409);
+  if (!(await reservePlace(env, order.type))) {
+    return json({ error: "full", message: "This week's " + KIND[order.type] + " places are taken. New places open on Monday; your draft is saved." }, 409);
   }
 
   const id = newId();
@@ -104,13 +108,13 @@ async function handleOrder(request, env) {
   const site_ = env.SITE_URL.replace(/\/$/, "");
   const session = await stripe(env, "POST", "/v1/checkout/sessions", {
     mode: "payment",
-    "line_items[0][price]": env[CURRENCIES[order.currency]],
+    "line_items[0][price]": env[priceVar(order.type, order.currency)],
     "line_items[0][quantity]": "1",
     customer_email: order.email,
     client_reference_id: id,
     "metadata[order_id]": id,
     "payment_intent_data[metadata][order_id]": id,
-    "payment_intent_data[description]": "TechDirectory sponsored post: " + order.title.slice(0, 80),
+    "payment_intent_data[description]": "TechDirectory " + KIND[order.type] + ": " + order.title.slice(0, 80),
     success_url: site_ + "/sponsored-post?paid=1",
     cancel_url: site_ + "/sponsored-post",
     expires_at: String(Math.floor(Date.now() / 1000) + 30 * 60),
@@ -135,7 +139,7 @@ async function handleWebhook(request, env, ctx) {
   if (!rec) return json({ ok: true, unknown: id });
 
   if (event.type === "checkout.session.expired") {
-    if (rec.status === "awaiting_payment") { rec.status = "expired"; await putOrder(env, rec); await releasePlace(env); }
+    if (rec.status === "awaiting_payment") { rec.status = "expired"; await putOrder(env, rec); await releasePlace(env, rec.order.type); }
     return json({ ok: true });
   }
   if (event.type !== "checkout.session.completed" || obj.payment_status !== "paid") return json({ ok: true, ignored: event.type });
@@ -169,7 +173,7 @@ export async function processPaid(env, rec) {
 
 function runChecks(order, imageInfo, network, hist) {
   return Checks.run({
-    title: order.title, html: order.html, category: order.category,
+    title: order.title, html: order.html, category: order.category, type: order.type, summary: order.summary,
     metaDescription: order.metaDescription, tags: order.tags,
     buyerDomains: order.buyerDomains, image: { width: imageInfo && imageInfo.width || 0 },
     network: network || undefined, history: hist,
@@ -239,11 +243,12 @@ async function publish(env, rec, r) {
   const o = rec.order;
   const slug = slugify(o.title) + "-" + rec.id.slice(0, 6);
   const site = env.SITE_URL.replace(/\/$/, "");
-  const url = site + (env.TD_POST_PATH || "/sponsored/") + slug;
+  const isPR = o.type === "press-release";
+  const url = site + (isPR ? env.TD_PR_PATH || "/press-releases/" : env.TD_POST_PATH || "/sponsored/") + slug;
   const now = new Date().toISOString();
   const imageUrl = env.WORKER_URL.replace(/\/$/, "") + "/image/" + rec.id;
   const m = Markup.build({
-    url, title: o.title, html: r.cleanHtml, metaDescription: r.metaDescription, tags: r.tags,
+    url, title: o.title, html: r.cleanHtml, metaDescription: r.metaDescription, tags: r.tags, type: o.type, summary: o.summary,
     categoryName: o.category, company: o.company, companyUrl: o.website,
     image: { url: imageUrl, width: rec.image.width, height: rec.image.height, alt: o.imageAlt || o.title },
     datePublished: now, dateModified: now,
@@ -259,8 +264,8 @@ async function publish(env, rec, r) {
   rec.tdPostId = created.id;
   await putOrder(env, rec);
   await indexNow(env, [rec.url]);
-  await email(env, o.email, "Your sponsored post is live on TechDirectory",
-    `Hello ${o.name},\n\nYour article "${o.title}" passed every check and is now live:\n${rec.url}\n\nIt is labelled Sponsored and stays live for at least 12 months.\n\nTechDirectory`);
+  await email(env, o.email, "Your " + KIND[o.type] + " is live on TechDirectory",
+    `Hello ${o.name},\n\nYour ${isPR ? "press release" : "article"} "${o.title}" passed every check and is now live:\n${rec.url}\n\nIt is labelled ${isPR ? "Press release" : "Sponsored"} and stays live for at least 12 months.\n\nTechDirectory`);
   return rec;
 }
 
@@ -275,7 +280,7 @@ async function refund(env, rec, fails) {
   h.push(Date.now());
   await env.ORDERS.put(key, JSON.stringify(h));
   for (const u of unsafeLinks(rec)) { const host = safeHost(u); if (host) await env.ORDERS.put("rejdomain:" + host, rec.id); }
-  await email(env, rec.order.email, "Your sponsored post could not be published: full refund sent",
+  await email(env, rec.order.email, "Your " + KIND[rec.order.type || "article"] + " could not be published: full refund sent",
     `Hello ${rec.order.name},\n\nWe could not publish "${rec.order.title}" and have refunded your payment in full. Reason:\n- ${rec.reasons.join("\n- ")}\n\nYou can fix this and submit once more at no charge: reply to this email with the corrected article.\n\nSponsored content policy: ${env.SITE_URL.replace(/\/$/, "")}/sponsored-content-policy\n\nTechDirectory`);
   return rec;
 }
@@ -316,7 +321,7 @@ async function handleAdmin(request, env, p) {
     const rec = await getOrder(env, m[1]);
     if (!rec || rec.status !== "queued") return json({ error: "not in queue" }, 404);
     if (m[2] === "publish") {
-      const r = Checks.run({ title: rec.order.title, html: rec.order.html, category: rec.order.category, metaDescription: rec.order.metaDescription, tags: rec.order.tags, buyerDomains: rec.order.buyerDomains, image: { width: rec.image.width } }, workerSanitizer);
+      const r = Checks.run({ title: rec.order.title, html: rec.order.html, category: rec.order.category, type: rec.order.type, summary: rec.order.summary, metaDescription: rec.order.metaDescription, tags: rec.order.tags, buyerDomains: rec.order.buyerDomains, image: { width: rec.image.width } }, workerSanitizer);
       await publish(env, rec, r);
     } else {
       await refund(env, rec, [{ id: "owner", label: "Did not meet the sponsored content policy", detail: "" }]);
@@ -337,15 +342,16 @@ function weekKey(d = new Date()) {
   const w = Math.ceil(((t - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7);
   return "week:" + y + "-W" + String(w).padStart(2, "0");
 }
-async function reservePlace(env) {
-  const key = weekKey();
+const capKey = (type) => weekKey() + (type === "press-release" ? ":pr" : "");
+async function reservePlace(env, type) {
+  const key = capKey(type);
   const n = Number(await env.ORDERS.get(key)) || 0;
-  if (n >= Number(env.WEEKLY_CAP || 15)) return false;
+  if (n >= Number((type === "press-release" ? env.PR_WEEKLY_CAP : env.WEEKLY_CAP) || 15)) return false;
   await env.ORDERS.put(key, String(n + 1), { expirationTtl: 21 * 864e2 });
   return true;
 }
-async function releasePlace(env) {
-  const key = weekKey();
+async function releasePlace(env, type) {
+  const key = capKey(type);
   const n = Number(await env.ORDERS.get(key)) || 0;
   if (n > 0) await env.ORDERS.put(key, String(n - 1), { expirationTtl: 21 * 864e2 });
 }

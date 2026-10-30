@@ -37,9 +37,11 @@
   function jsonScript(obj) { return '<script type="application/ld+json">' + JSON.stringify(obj).replace(/</g, "\\u003c") + "</script>"; }
 
   function build(p) {
+    var isPR = p.type === "press-release";
+    var label = isPR ? "Press release" : "Sponsored";
     var tags = (p.tags || []).slice(0, 5);
     var modified = p.dateModified || p.datePublished;
-    var title = p.title + " | Sponsored | TechDirectory";
+    var title = p.title + " | " + label + " | TechDirectory";
 
     var article = {
       "@context": "https://schema.org",
@@ -54,7 +56,7 @@
       author: { "@type": "Organization", name: p.company, url: p.companyUrl },
       sponsor: { "@type": "Organization", name: p.company, url: p.companyUrl },
       publisher: ORG,
-      articleSection: "Sponsored",
+      articleSection: label,
       keywords: tags.join(", "),
       about: p.categoryName ? { "@type": "Thing", name: p.categoryName } : undefined,
       isAccessibleForFree: true,
@@ -65,7 +67,7 @@
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: SITE + "/" },
         { "@type": "ListItem", position: 2, name: "Publishing", item: SITE + "/publishing" },
-        { "@type": "ListItem", position: 3, name: "Sponsored", item: SITE + "/sponsored" },
+        { "@type": "ListItem", position: 3, name: label, item: SITE + (isPR ? "/press-releases" : "/sponsored") },
         { "@type": "ListItem", position: 4, name: p.title, item: p.url }
       ]
     };
@@ -84,24 +86,26 @@
       '<meta property="og:site_name" content="TechDirectory">',
       '<meta property="article:published_time" content="' + esc(p.datePublished) + '">',
       '<meta property="article:modified_time" content="' + esc(modified) + '">',
-      '<meta property="article:section" content="Sponsored">'
+      '<meta property="article:section" content="' + label + '">'
     ].concat(tags.map(function (t) { return '<meta property="article:tag" content="' + esc(t) + '">'; }))
      .concat(['<meta name="twitter:card" content="summary_large_image">',
               jsonScript(JSON.parse(JSON.stringify(article))), jsonScript(crumbs)])
      .filter(Boolean).join("\n");
 
     var body =
-      '<article class="td-post td-post--sponsored" itemscope>' +
-      '<p class="td-post__label"><span class="td-badge td-badge--sponsored">Sponsored</span> ' +
+      '<article class="td-post td-post--sponsored' + (isPR ? ' td-post--press-release' : '') + '" itemscope>' +
+      '<p class="td-post__label"><span class="td-badge td-badge--sponsored">' + label + '</span> ' +
       '<a href="/sponsored-content-policy">What this means</a></p>' +
       "<h1>" + esc(p.title) + "</h1>" +
-      '<p class="td-post__byline">Sponsored by <a href="' + esc(p.companyUrl) + '" rel="sponsored noopener" target="_blank">' + esc(p.company) + "</a>" +
+      '<p class="td-post__byline">' + (isPR ? "Press release from" : "Sponsored by") + ' <a href="' + esc(p.companyUrl) + '" rel="sponsored noopener" target="_blank">' + esc(p.company) + "</a>" +
       ' · Published <time datetime="' + esc(p.datePublished) + '">' + esc(day(p.datePublished)) + "</time>" +
       (modified && modified !== p.datePublished ? ' · Last updated <time datetime="' + esc(modified) + '">' + esc(day(modified)) + "</time>" : "") + "</p>" +
       (p.image && p.image.url ? '<img class="td-post__image" src="' + esc(p.image.url) + '" alt="' + esc(p.image.alt) + '" width="' + esc(p.image.width) + '" height="' + esc(p.image.height) + '" loading="eager">' : "") +
+      (isPR && p.summary ? '<p class="td-post__summary"><strong>In short:</strong> ' + esc(p.summary) + "</p>" : "") +
       '<div class="td-post__body">' + p.html + "</div>" +
       (tags.length ? '<p class="td-post__tags">Topics: ' + tags.map(function (t) { return '<span class="td-post__tag">' + esc(t) + "</span>"; }).join(" ") + "</p>" : "") +
-      '<p class="td-post__disclosure">This is a paid post written by ' + esc(p.company) + ". TechDirectory checked it against its " +
+      '<p class="td-post__disclosure">' + (isPR ? "This is a paid press release from " + esc(p.company) + ", published as supplied; it may also appear elsewhere. TechDirectory checked it against its "
+                                               : "This is a paid post written by " + esc(p.company) + ". TechDirectory checked it against its ") +
       '<a href="/sponsored-content-policy">sponsored content policy</a> but does not endorse it. Links are marked as sponsored.</p>' +
       "</article>";
 

@@ -105,6 +105,25 @@ t("A title over 70 characters is borderline", r.checks.find((c) => c.id === "seo
 r = run({ tags: ["a", "b", "c", "d", "e", "f"] });
 t("Only 5 tags are kept", r.tags.length === 5);
 
+/* Press releases (owner, 30 October 2026) */
+const prHtml = `<p>Example Cloud Ltd today announced a new managed migration service for mid-sized software teams moving to the cloud.</p><p>${para(290)} for the business. Read more about <a href="https://example.com/cloud">the service</a>.</p>`;
+const prSummary = "Example Cloud has launched a managed migration service aimed at software teams with 50 to 500 staff. It covers planning, data transfer and testing, and is priced per project rather than per hour, which the company says makes budgets easier to agree.";
+const pr = (over) => run(Object.assign({ type: "press-release", html: prHtml, summary: prSummary, metaDescription: "" }, over));
+r = pr({});
+t("Press release of about 300 words with its own summary passes", r.result === "pass" && r.type === "press-release", JSON.stringify(r.checks.filter((c) => c.result !== "pass")));
+t("Press release needs no subheading", r.checks.find((c) => c.id === "format").result === "pass");
+t("Press release search summary comes from its TechDirectory summary", r.metaDescription.startsWith("Example Cloud has launched"));
+r = pr({ html: `<p>${para(250)}</p>` });
+t("Press release under 300 words fails", r.checks.find((c) => c.id === "length").result === "fail");
+r = pr({ summary: "Short summary of the news." });
+t("Press release without a 40-word summary fails", r.checks.find((c) => c.id === "summary").result === "fail");
+r = pr({ html: prHtml + `<p>${prSummary}</p>` });
+t("Summary copied from the release itself fails", r.checks.find((c) => c.id === "summary").result === "fail");
+r = pr({ html: prHtml.replace("cloud.</p>", "cloud and online casino tips.</p>") });
+t("Banned topics still fail in a press release", r.result === "fail");
+r = run({ type: "article", html: `<p>${para(400)}</p><h2>Why</h2><p>${para(60)}</p>` });
+t("An article still needs 500 words", r.checks.find((c) => c.id === "length").result === "fail");
+
 const w = Math.max(...results.map(([n]) => n.length));
 let fails = 0;
 for (const [n, ok, d] of results) { if (!ok) fails++; console.log(`${ok ? "PASS" : "FAIL"}  ${n.padEnd(w)}  ${ok ? "" : d}`); }

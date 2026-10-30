@@ -44,6 +44,15 @@ t("Image has alt text and size (no layout shift)", $(".td-post__image").alt && $
 const evil = P.build(Object.assign({}, post, { title: '</script><script>alert(1)</script>', company: '<b>x</b>' }));
 t("Title and company are escaped", !/<script>alert/.test(evil.head.replace(/application\/ld\+json/g, "")) && !/<b>x<\/b>/.test(evil.body) && !/<\/script><script>/.test(evil.head));
 
+const prOut = P.build(Object.assign({}, post, { type: "press-release", summary: "Example Cloud has launched a managed migration service for software teams." }));
+const prDoc = new JSDOM(`<!doctype html><html><head>${prOut.head}</head><body>${prOut.body}</body></html>`).window.document;
+t("Press release: labelled 'Press release' in title, badge, byline and data",
+  /\| Press release \| TechDirectory$/.test(prDoc.querySelector("title").textContent) && prDoc.querySelector(".td-badge").textContent === "Press release" &&
+  /Press release from/.test(prDoc.querySelector(".td-post__byline").textContent) && prOut.jsonld[0].articleSection === "Press release");
+t("Press release: 'In short' summary sits above the release", /In short:/.test(prDoc.querySelector(".td-post__summary").textContent) &&
+  prDoc.querySelector(".td-post__summary").compareDocumentPosition(prDoc.querySelector(".td-post__body")) & 4);
+t("Press release: disclosure says it may appear elsewhere", /may also appear elsewhere/.test(prDoc.querySelector(".td-post__disclosure").textContent));
+
 const w = Math.max(...results.map(([n]) => n.length));
 let f = 0;
 for (const [n, ok, d] of results) { if (!ok) f++; console.log(`${ok ? "PASS" : "FAIL"}  ${n.padEnd(w)}  ${ok ? "" : d}`); }

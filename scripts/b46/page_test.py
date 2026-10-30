@@ -89,6 +89,27 @@ with sync_playwright() as pw:
 
     p.click("#sp-submit")
     check("Submit without details is stopped with a message", p.inner_text("#sp-form-error") != "")
+
+    # Press release option (owner, 30 October 2026)
+    check("Summary box hidden for an article", p.locator("#sp-summary-field").is_hidden())
+    p.check('input[name="product"][value="press-release"]')
+    p.wait_for_timeout(400)
+    check("Press release: price switches to £279 (Announcement Plus)", p.inner_text(".td-sp__price") == "£279" and "£279" in p.inner_text("#sp-submit"), p.inner_text("#sp-submit"))
+    check("Press release: summary box and own-news wording appear",
+          p.locator("#sp-summary-field").is_visible() and "own news" in p.inner_text("#sp-body-label") and "own press release" in p.inner_text(".td-sp__consent >> nth=2"),
+          p.inner_text("#sp-body-label"))
+    p.evaluate("html => document.querySelector('.ql-editor').innerHTML = html", ARTICLE)
+    p.wait_for_timeout(700)
+    check("Press release: missing summary shows 'Will be refused'",
+          p.locator("#td-sp-checks li:has-text('Summary for TechDirectory') .td-sp__pill--bad").count() == 1, p.inner_text("#td-sp-checks"))
+    p.fill("#sp-summary", "Example Cloud has launched a managed migration service for software teams with 50 to 500 staff. It covers planning, data transfer and testing, and is priced per project, which the company says makes budgets easier to agree for finance teams.")
+    p.wait_for_timeout(700)
+    check("Press release: own summary passes and counts words",
+          p.locator("#td-sp-checks li:has-text('Summary for TechDirectory') .td-sp__pill--ok").count() == 1 and int(p.inner_text("#sp-summary-count")) >= 40,
+          p.inner_text("#td-sp-checks"))
+    p.check('input[name="product"][value="article"]')
+    p.wait_for_timeout(300)
+    check("Back to article: price returns to £159", p.inner_text(".td-sp__price") == "£159")
     stored = p.evaluate("() => { try { return !!localStorage.getItem('td-sp-draft-v1') } catch (e) { return 'blocked' } }")
     if stored == "blocked":
         # set_content pages have no origin, so the browser blocks storage here; the page must still work

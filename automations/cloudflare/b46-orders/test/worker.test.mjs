@@ -19,7 +19,7 @@ const ADMIN = "a".repeat(40);
 function makeEnv(extra = {}) {
   return {
     ORDERS: new KV(), SITE_URL: "https://www.techdirectory.io", WORKER_URL: "https://orders.techdirectory.io",
-    PRICE_USD: "price_usd", PRICE_GBP: "price_gbp", PRICE_EUR: "price_eur", WEEKLY_CAP: "15",
+    PRICE_USD: "price_usd", PRICE_GBP: "price_gbp", PRICE_EUR: "price_eur", PRICE_PR_USD: "price_pr_usd", PRICE_PR_GBP: "price_pr_gbp", PRICE_PR_EUR: "price_pr_eur", WEEKLY_CAP: "15",
     STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: SECRET, TD_API_KEY: "td", TD_POST_TYPE_ID: "7", TD_AUTHOR_USER_ID: "1",
     WEB_RISK_KEY: "wr", COPYSCAPE_USER: "u", COPYSCAPE_KEY: "k", INDEXNOW_KEY: "0123456789abcdef0123456789abcdef",
     OWNER_EMAIL: "owner@techdirectory.io", SENDER_EMAIL: "info@techdirectory.io", ADMIN_TOKEN: ADMIN, BREVO_API_KEY: "b",
@@ -193,6 +193,26 @@ const reset = () => { calls = []; behaviour = {}; };
   const tweaked = await run(orderForm({ html: goodHtml.replace("carefully", "very carefully") }), env);
   t("100% unique: the same article can't be sold twice", first.rec.status === "published" && again.status === 422 && /100% unique/.test(j.message));
   t("100% unique: a lightly edited copy is still caught", tweaked.status === 422); }
+
+{ reset(); const env = makeEnv();
+  const prHtml = `<p>Example Cloud Ltd today announced a managed migration service for software teams. ${words(330)} See <a href="https://example.com/cloud-guide">the service page</a>.</p>`;
+  const prSummary = "Example Cloud has launched a managed migration service for software teams with 50 to 500 staff. It covers planning, data transfer and testing, and is priced per project, which the company says makes budgets easier to agree for finance teams.";
+  const r = await run(orderForm({ product: "press-release", html: prHtml, summary: prSummary, metaDescription: "" }), env); const j = await r.json();
+  const p = new URLSearchParams(hit("checkout/sessions")[0]?.body || "");
+  t("Press release order uses the press-release price", r.status === 200 && p.get("line_items[0][price]") === "price_pr_usd", JSON.stringify(j));
+  await run(await signed(env, paidEvent(j.orderId)), env);
+  const rec = await env.ORDERS.get("order:" + j.orderId, "json");
+  const post = new URLSearchParams(hit("data_posts/create")[0]?.body || "");
+  t("Press release published under /press-releases/ with its label and summary", rec.status === "published" && /\/press-releases\//.test(rec.url) && /Press release from/.test(post.get("post_content") || "") && /In short:/.test(post.get("post_content") || ""), rec.queueReason || JSON.stringify(rec.checks?.filter(c=>c.result!=="pass")));
+  const noSum = await run(orderForm({ product: "press-release", html: prHtml.replace("today", "this week"), summary: "Too short." }), env);
+  t("Press release without its own summary is stopped before payment", noSum.status === 422); }
+
+{ reset(); const env = makeEnv({ PR_WEEKLY_CAP: "1" }); await run(orderForm(), env); await run(orderForm({ html: goodHtml.replace("carefully", "with care") }), env);
+  const prHtml = `<p>Example Cloud Ltd today announced a new service. ${words(330)}</p>`;
+  const prSummary = "Example Cloud has launched a managed migration service for software teams with 50 to 500 staff. It covers planning, data transfer and testing, and is priced per project, which the company says makes budgets easier to agree for finance teams.";
+  const a = await run(orderForm({ product: "press-release", html: prHtml, summary: prSummary }), env);
+  const b = await run(orderForm({ product: "press-release", html: prHtml.replace("new service", "second service"), summary: prSummary }), env);
+  t("Press releases have their own weekly limit, separate from articles", a.status === 200 && b.status === 409); }
 
 /* sanitiser and image header */
 const x = workerSanitizer.sanitize('<p>a<script>alert(1)</script><img src="javascript:alert(1)" onerror="x"><a href="javascript:alert(1)">b</a><iframe src="//e"></iframe><svg><script>1</script></svg><a href="https://ok.com" style="x" class="y">ok</a></p>', { ALLOWED_TAGS: Checks.RULES.allowedTags, ALLOWED_ATTR: Checks.RULES.allowedAttr });
