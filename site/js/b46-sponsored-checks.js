@@ -11,6 +11,7 @@
  *
  * input = {
  *   title, html, category,             // from the order form
+ *   metaDescription, tags: [..],       // search summary and up to 5 topic tags (blank summary = made from the first paragraph)
  *   buyerDomains: ["example.com"],     // the buyer's own sites (from the order form)
  *   image: { width },                  // featured image width in px
  *   network: {                         // filled in after payment; missing = borderline
@@ -63,6 +64,7 @@
       "hardware-and-devices": ["hardware", "device", "devices", "chip", "semiconductor", "server", "laptop", "iot"],
       "business-technology": ["technology", "software", "digital", "platform", "automation", "tools", "it"]
     },
+    seo: { titleMax: 70, descMin: 70, descMax: 160, maxTags: 5, tagMax: 30 },
     allowedTags: ["p", "h2", "h3", "strong", "em", "a", "ul", "ol", "li", "blockquote", "img", "br"],
     allowedAttr: ["href", "src", "alt"],
     forbiddenTags: ["script", "iframe", "form", "object", "embed", "input", "button", "frame", "frameset", "link", "meta", "style"]
@@ -84,6 +86,14 @@
   function domainMatches(host, domains) {
     return (domains || []).some(function (d) { d = String(d).toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "");
       return d && (host === d || host.slice(-(d.length + 1)) === "." + d); });
+  }
+
+  /* a search summary made from the first paragraph, cut at a word boundary */
+  function autoDescription(text, max) {
+    text = String(text || "").replace(/\s+/g, " ").trim();
+    if (text.length <= max) return text;
+    var cut = text.slice(0, max); cut = cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:\-–—]$/, "");
+    return cut + "…";
   }
 
   function sanitize(html, DOMPurify) {
@@ -152,7 +162,8 @@
     else add("anchors", "Link wording", "pass", "");
 
     /* Banned topics: title, text, link addresses and image name */
-    var hay = [input.title, body, links.map(function (l) { return l.url + " " + l.anchor; }).join(" "),
+    var tags = (input.tags || []).map(function (x) { return String(x).trim(); }).filter(Boolean);
+    var hay = [input.title, body, input.metaDescription || "", tags.join(" "), links.map(function (l) { return l.url + " " + l.anchor; }).join(" "),
                (input.image && input.image.name) || ""].join(" ").toLowerCase();
     var clear = RULES.bannedClear.filter(function (t) { return hasPhrase(hay, t); });
     var amb = RULES.bannedAmbiguous.filter(function (t) { return hasPhrase(hay, t); });
@@ -202,6 +213,17 @@
     if (!(imgW >= RULES.minImageWidth)) issues.push("featured image narrower than 1,200 px");
     add("format", "Language and format", issues.length ? "borderline" : "pass", issues.join("; "));
 
+    /* Search and AI summary: title, meta description and tags */
+    var S = RULES.seo, seoIssues = [];
+    var firstPara = textOf((s.html.match(/<p>([\s\S]*?)<\/p>/i) || [])[1] || "");
+    var desc = String(input.metaDescription || "").trim() || autoDescription(firstPara, S.descMax - 5);
+    if ((input.title || "").length > S.titleMax) seoIssues.push("title longer than " + S.titleMax + " characters (may be cut off in search results)");
+    if (desc.length < S.descMin || desc.length > S.descMax) seoIssues.push("search summary is " + desc.length + " characters (70–160 works best)");
+    if (!tags.length) seoIssues.push("no topic tags");
+    if (tags.length > S.maxTags) seoIssues.push("more than " + S.maxTags + " tags");
+    if (tags.some(function (x) { return x.length > S.tagMax; })) seoIssues.push("a tag longer than " + S.tagMax + " characters");
+    add("seo", "Search summary and tags", seoIssues.length ? "borderline" : "pass", seoIssues.join("; "));
+
     /* Buyer history */
     var ref = (input.history && input.history.refusals12m) || 0;
     if (ref >= 2) add("history", "Order history", "fail", ref + " refused posts in 12 months");
@@ -210,8 +232,9 @@
 
     var result = checks.some(function (c) { return c.result === "fail"; }) ? "fail"
       : checks.some(function (c) { return c.result === "borderline"; }) ? "borderline" : "pass";
-    return { result: result, checks: checks, cleanHtml: s.html, words: n, links: links };
+    return { result: result, checks: checks, cleanHtml: s.html, words: n, links: links,
+             metaDescription: desc, tags: tags.slice(0, S.maxTags) };
   }
 
-  return { run: run, sanitize: sanitize, RULES: RULES };
+  return { run: run, sanitize: sanitize, autoDescription: autoDescription, RULES: RULES };
 });

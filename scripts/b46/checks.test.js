@@ -23,6 +23,8 @@ const base = {
   image: { width: 1600, name: "cloud-migration.jpg" },
   network: { links: { "https://example.com/cloud": { status: 200, safe: true } }, originality: "none" },
   history: { refusals12m: 0 },
+  metaDescription: "A practical guide to planning a cloud platform migration: what to check first, who to involve and how to keep data safe.",
+  tags: ["cloud migration", "SaaS", "infrastructure"],
 };
 const run = (over) => C.run(Object.assign({}, base, over), DOMPurify);
 const results = [];
@@ -87,6 +89,19 @@ t("One refusal in 12 months is borderline", r.checks.find((c) => c.id === "histo
 r = run({ html: goodHtml.replace("https://example.com/cloud", "https://another-site.com/x"),
           network: { links: { "https://another-site.com/x": { status: 200, safe: true } }, originality: "none" } });
 t("A link to someone else's site is borderline", r.checks.find((c) => c.id === "links").result === "borderline");
+
+r = run({ tags: ["cloud", "online casino"] });
+t("A banned word in a tag is a hard fail", r.result === "fail");
+r = run({ metaDescription: "" });
+t("A blank search summary is made from the first paragraph", r.metaDescription.startsWith("Cloud software is changing") && r.metaDescription.length <= 160, r.metaDescription);
+r = run({ metaDescription: "Too short." });
+t("A search summary under 70 characters is borderline", r.checks.find((c) => c.id === "seo").result === "borderline");
+r = run({ tags: [] });
+t("No tags is borderline", r.checks.find((c) => c.id === "seo").result === "borderline");
+r = run({ title: "A".repeat(90) + " cloud software" });
+t("A title over 70 characters is borderline", r.checks.find((c) => c.id === "seo").result === "borderline");
+r = run({ tags: ["a", "b", "c", "d", "e", "f"] });
+t("Only 5 tags are kept", r.tags.length === 5);
 
 const w = Math.max(...results.map(([n]) => n.length));
 let fails = 0;

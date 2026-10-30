@@ -114,6 +114,20 @@ window.TD_SP_CONFIG = {
           <div class="td-sp__field"><label for="sp-alt">Image description (alt text)</label><input id="sp-alt" name="imageAlt" type="text" maxlength="160"></div>
         </section>
 
+        <section class="td-sp__panel" aria-labelledby="td-sp-search">
+          <h2 id="td-sp-search">How it shows in search and AI answers</h2>
+          <div class="td-sp__field">
+            <label for="sp-desc">Search summary <span class="hint">70–160 characters; shown under your title in Google, Bing and AI assistants. Leave blank to use your first paragraph.</span></label>
+            <textarea id="sp-desc" name="metaDescription" rows="3" maxlength="200" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font:inherit"></textarea>
+            <p class="td-sp__note" style="margin-top:6px"><span id="sp-desc-count">0</span> characters <span id="sp-desc-auto" class="hint"></span></p>
+          </div>
+          <div class="td-sp__field">
+            <label for="sp-tags">Topic tags <span class="hint">up to 5, separated by commas, for example: cloud migration, SaaS, data security</span></label>
+            <input id="sp-tags" name="tags" type="text" maxlength="180">
+          </div>
+          <p class="td-sp__note">Tip: AI assistants quote clear answers. Subheadings written as questions buyers ask ("How long does a cloud migration take?") followed by a direct answer in the first sentence work best.</p>
+        </section>
+
         <section class="td-sp__panel" aria-labelledby="td-sp-checks-h">
           <h2 id="td-sp-checks-h">Publishing checks</h2>
           <p class="td-sp__note" style="margin-top:0">These update as you write. Link safety and originality are checked after you pay.</p>
@@ -182,17 +196,21 @@ window.TD_SP_CONFIG = {
     formats: ["header", "bold", "italic", "link", "list", "blockquote"]
   });
 
+  function tagList() { return $("sp-tags").value.split(",").map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 5); }
   function articleHtml() { return quill.getSemanticHTML ? quill.getSemanticHTML() : quill.root.innerHTML; }
   function domains() { try { return [new URL($("sp-site").value).hostname.replace(/^www\./, "")]; } catch (e) { return []; } }
 
   function evaluate() {
     var r = TDSponsoredChecks.run({ title: $("sp-title").value, html: articleHtml(), category: $("sp-category").value,
+      metaDescription: $("sp-desc").value, tags: tagList(),
       buyerDomains: domains(), image: imageInfo, network: null, history: { refusals12m: 0 } }, DOMPurify);
     var wEl = $("sp-words"), lEl = $("sp-links");
     wEl.textContent = r.words.toLocaleString("en-GB") + " words";
     wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= 600 && r.words <= 1500 ? "ok" : (r.words < 450 || r.words > 2000) ? "bad" : "warn");
     lEl.textContent = r.links.length + " of 2 links";
     lEl.className = "td-sp__pill td-sp__pill--" + (r.links.length <= 2 ? "ok" : "bad");
+    $("sp-desc-count").textContent = r.metaDescription.length;
+    $("sp-desc-auto").textContent = $("sp-desc").value.trim() ? "" : (r.metaDescription ? "(using your first paragraph: \u201c" + r.metaDescription.replace(/[<>&]/g, "") + "\u201d)" : "");
     var shown = r.checks.filter(function (c) { return c.id !== "safety" && c.id !== "originality" && c.id !== "history"; });
     var labels = { pass: ["ok", "Passes"], borderline: ["warn", "Needs a look"], fail: ["bad", "Will be refused"] };
     $("td-sp-checks").innerHTML = shown.map(function (c) {
@@ -206,7 +224,7 @@ window.TD_SP_CONFIG = {
   /* draft kept in this browser while the writer works (Build Scope 28.2.2) */
   function saveDraft() {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({ title: $("sp-title").value, category: $("sp-category").value, html: articleHtml(),
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ desc: $("sp-desc").value, tags: $("sp-tags").value, title: $("sp-title").value, category: $("sp-category").value, html: articleHtml(),
         name: $("sp-name").value, email: $("sp-email").value, company: $("sp-company").value, website: $("sp-site").value, alt: $("sp-alt").value }));
       $("sp-saved").textContent = "Draft saved in this browser";
     } catch (e) {}
@@ -215,13 +233,14 @@ window.TD_SP_CONFIG = {
     var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
     if (d) { ["title", "category", "name", "email", "company"].forEach(function (k) { if (d[k]) $("sp-" + k).value = d[k]; });
       if (d.website) $("sp-site").value = d.website; if (d.alt) $("sp-alt").value = d.alt;
+      if (d.desc) $("sp-desc").value = d.desc; if (d.tags) $("sp-tags").value = d.tags;
       if (d.html) quill.clipboard.dangerouslyPasteHTML(DOMPurify.sanitize(d.html)); }
   } catch (e) {}
 
   var t;
   function changed() { clearTimeout(t); t = setTimeout(function () { evaluate(); saveDraft(); }, 300); }
   quill.on("text-change", changed);
-  ["sp-title", "sp-category", "sp-site", "sp-name", "sp-email", "sp-company", "sp-alt"].forEach(function (id) { $(id).addEventListener("input", changed); });
+  ["sp-title", "sp-category", "sp-site", "sp-name", "sp-email", "sp-company", "sp-alt", "sp-desc", "sp-tags"].forEach(function (id) { $(id).addEventListener("input", changed); });
 
   $("sp-image").addEventListener("change", function () {
     var f = this.files && this.files[0], msg = $("sp-image-msg");
@@ -247,6 +266,7 @@ window.TD_SP_CONFIG = {
     if (missing.length) { err.textContent = "Please fill in every field above."; $(missing[0]).focus(); return; }
     if (!imageInfo.file || !imageInfo.ok) { err.textContent = "Please add a featured image at least 1,200 px wide."; $("sp-image").focus(); return; }
     if (!$("sp-alt").value.trim()) { err.textContent = "Please describe the image for people who can't see it."; $("sp-alt").focus(); return; }
+    if (!tagList().length) { err.textContent = "Please add at least one topic tag."; $("sp-tags").focus(); return; }
     if (!$("sp-consent").checked) { err.textContent = "Please accept the sponsored content policy."; $("sp-consent").focus(); return; }
     if (r.result === "fail") { err.textContent = "Your article would be refused as it stands. Fix the checks marked \"Will be refused\" first."; return; }
     if (!cfg.orderEndpoint) { err.textContent = "Ordering opens soon. Your draft is saved in this browser."; return; }
@@ -255,7 +275,7 @@ window.TD_SP_CONFIG = {
     var fd = new FormData();
     fd.append("name", $("sp-name").value); fd.append("email", $("sp-email").value); fd.append("company", $("sp-company").value);
     fd.append("website", $("sp-site").value); fd.append("title", $("sp-title").value); fd.append("category", $("sp-category").value);
-    fd.append("html", r.cleanHtml); fd.append("imageAlt", $("sp-alt").value); fd.append("image", imageInfo.file);
+    fd.append("html", r.cleanHtml); fd.append("metaDescription", r.metaDescription); fd.append("tags", r.tags.join(",")); fd.append("imageAlt", $("sp-alt").value); fd.append("image", imageInfo.file);
     fd.append("currency", $("sp-currency").value); fd.append("policyAccepted", new Date().toISOString());
     fetch(cfg.orderEndpoint, { method: "POST", body: fd }).then(function (res) { return res.json(); }).then(function (j) {
       if (j && j.checkoutUrl) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} window.location.href = j.checkoutUrl; }
