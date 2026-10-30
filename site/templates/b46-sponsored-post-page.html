@@ -97,7 +97,7 @@ window.TD_SP_CONFIG = {
             <select id="sp-category" name="category" required><option value="">Choose a technology category</option></select>
           </div>
           <div class="td-sp__field">
-            <label id="sp-body-label">Article <span class="hint">600–1,500 words, up to 2 links to your own site, at least one subheading</span></label>
+            <label id="sp-body-label">Article <span class="hint">at least 500 words (1,000 or more recommended) of 100% unique content, up to 2 links to your own site, at least one subheading</span></label>
             <div id="td-sp-editor" aria-labelledby="sp-body-label"></div>
             <div class="td-sp__meter" aria-live="polite">
               <span id="sp-words" class="td-sp__pill td-sp__pill--warn">0 words</span>
@@ -136,7 +136,7 @@ window.TD_SP_CONFIG = {
 
         <section class="td-sp__panel">
           <label class="td-sp__consent"><input id="sp-consent" type="checkbox" required>
-            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. The article is my company's own work, I have the right to publish it and its image, and I understand it will be labelled "Sponsored".</span></label>
+            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. My article is 100% unique and not published anywhere else, I have the right to use its image, and I understand it will be labelled "Sponsored".</span></label>
           <p id="sp-form-error" class="td-sp__error" role="alert"></p>
           <button id="sp-submit" class="td-sp__btn" type="submit"><span>Pay <span data-td-price>$199</span> and submit</span></button>
           <p class="td-sp__note"><b>Refunds.</b> If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>.</p>
@@ -206,7 +206,7 @@ window.TD_SP_CONFIG = {
       buyerDomains: domains(), image: imageInfo, network: null, history: { refusals12m: 0 } }, DOMPurify);
     var wEl = $("sp-words"), lEl = $("sp-links");
     wEl.textContent = r.words.toLocaleString("en-GB") + " words";
-    wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= 600 && r.words <= 1500 ? "ok" : (r.words < 450 || r.words > 2000) ? "bad" : "warn");
+    wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= 1000 && r.words <= 3000 ? "ok" : (r.words < 500 || r.words > 4000) ? "bad" : "warn");
     lEl.textContent = r.links.length + " of 2 links";
     lEl.className = "td-sp__pill td-sp__pill--" + (r.links.length <= 2 ? "ok" : "bad");
     $("sp-desc-count").textContent = r.metaDescription.length;

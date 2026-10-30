@@ -31,9 +31,9 @@
   "use strict";
 
   var RULES = {
-    words: { pass: [600, 1500], hardBelow: 450, hardAbove: 2000 },
+    words: { pass: [500, 3000], hardBelow: 500, hardAbove: 4000, recommended: 1000 },   // owner, 30 Oct 2026: at least 500, 1,000+ recommended
     maxLinks: 2,
-    wordsPerLink: 300,
+    wordsPerLink: 250,
     anchorMaxWords: 5,
     minImageWidth: 1200,
     moneyWords: ["casino", "loan", "loans", "cheap", "buy now", "best price", "discount", "payday", "betting", "bet",
@@ -138,9 +138,9 @@
     var R = RULES.words;
 
     /* Length */
-    if (n < R.hardBelow || n > R.hardAbove) add("length", "Length", "fail", n + " words (600–1,500 accepted)");
-    else if (n < R.pass[0] || n > R.pass[1]) add("length", "Length", "borderline", n + " words (600–1,500 accepted)");
-    else add("length", "Length", "pass", n + " words");
+    if (n < R.hardBelow || n > R.hardAbove) add("length", "Length", "fail", n + " words (500–3,000 accepted)");
+    else if (n < R.pass[0] || n > R.pass[1]) add("length", "Length", "borderline", n + " words (over 3,000 is checked by hand)");
+    else add("length", "Length", "pass", n + " words" + (n < R.recommended ? " (1,000 or more recommended)" : ""));
 
     /* Links */
     var links = linksIn(s.html);
@@ -150,7 +150,7 @@
       var foreign = links.filter(function (l) { return !domainMatches(hostOf(l.url), buyer); });
       var tooDense = links.length > 0 && n / links.length < RULES.wordsPerLink;
       if (foreign.length) add("links", "Links", "borderline", "Link to a site that isn't yours: " + foreign.map(function (l) { return hostOf(l.url); }).join(", "));
-      else if (tooDense) add("links", "Links", "borderline", "Fewer than 300 words per link");
+      else if (tooDense) add("links", "Links", "borderline", "Fewer than 250 words per link");
       else add("links", "Links", "pass", links.length + " link" + (links.length === 1 ? "" : "s"));
     }
 
@@ -196,7 +196,7 @@
 
     /* Originality */
     var orig = net && net.originality;
-    if (orig === "off") add("originality", "Originality", "pass", "Not checked: buyer confirms the post is their own content (owner decision, 30 October 2026)");
+    if (orig === "off") add("originality", "Originality", "pass", "Web-wide check off until revenue allows; buyer confirms the post is 100% unique (owner, 30 October 2026)");
     else if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
     else if (orig === "none") add("originality", "Originality", "pass", "");
     else add("originality", "Originality", "borderline", orig === "partial" ? "Partial match found" : "Not checked yet");

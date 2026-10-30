@@ -21,7 +21,7 @@ TechDirectory, 71-75 Shelton Street, London WC2H 9JQ. Our full company details a
 | | |
 | --- | --- |
 | Price | $199, £159 or €185 per post, before any tax, paid in full when you order |
-| What is published | One article of 600 to 1,500 words that you write, with a featured image you have the right to use |
+| What is published | One article of at least 500 words (1,000 or more recommended, up to 3,000), 100% unique, that you write, with a featured image you have the right to use |
 | Label | Every post shows "Sponsored" above the title and "Sponsored by [your company]" as the byline. It is never presented as TechDirectory's own writing |
 | Links | Up to 2 links to your own websites. Every link carries `rel="sponsored"`, as Google requires for paid links. We do not sell links without this attribute |
 | How long it stays | At least 12 months from publication. After that it normally stays online for as long as the site runs, unless it breaks this policy or its links stop working |
@@ -33,7 +33,8 @@ Sponsored posts are sold to businesses only. You must give your company name whe
 
 ### What a post must be
 
-- Your own content: you may reuse your own article or press release that has appeared elsewhere, but you may not submit someone else's work.
+- 100% unique: not published anywhere else, including your own site, and not published elsewhere afterwards. A press release already sent out must be rewritten.
+- At least 500 words; 1,000 or more is recommended.
 - About a technology or business-technology topic that is relevant to people who buy technology for their organisations.
 - Accurate. No claims you cannot support, no claims about other named companies, and no fake reviews or testimonials.
 - Mainly useful to the reader, not written mainly to carry links.
@@ -87,11 +88,11 @@ This policy is governed by the laws of England and Wales. Nothing in it limits a
 
 ## Short refund wording for the order page and checkout
 
-> **Refunds.** If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets this policy. [Sponsored content policy](/sponsored-content-policy)
+> **Refunds.** If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets this policy. A post found to be copied or published elsewhere is removed without a refund. [Sponsored content policy](/sponsored-content-policy)
 
 ## Tick box at checkout (unticked by default)
 
-> I have read and accept the [sponsored content policy](/sponsored-content-policy). The article is my company's own work, I have the right to publish it and its image, and I understand it will be labelled "Sponsored".
+> I have read and accept the [sponsored content policy](/sponsored-content-policy). My article is 100% unique and not published anywhere else, I have the right to use its image, and I understand it will be labelled "Sponsored".
 
 ## Decisions (30 October 2026)
 
@@ -102,4 +103,4 @@ The owner asked the builder to make these calls. All points are decided.
 3. **Full refund if we remove a post within 12 months** for our own reasons: decided, yes. We promise 12 months, so breaking that must cost us, not the buyer.
 4. **One free correction within 30 days**: decided, yes. Typos and broken links to the buyer's own site only; costs minutes and avoids disputes.
 5. **Business buyers only**: decided, yes. Keeps consumer cancellation rights and foreign VAT out of scope.
-6. **Own content only** (owner, 30 October): a company may reuse its own press release or article that has appeared elsewhere; copying someone else's work is not allowed. The buyer confirms this with the tick box. There is no automatic copied-text check (Copyscape) for now; a reported copy is removed and refunded under this policy.
+6. **100% unique, at least 500 words, 1,000 or more recommended, up to 3,000** (owner, 30 October): not published anywhere else, including the buyer's own site. The buyer confirms with the tick box; TechDirectory checks that the same text hasn't been submitted to it before. There is no web-wide copied-text check (Copyscape) until revenue allows; a post found to be copied is removed without a refund.

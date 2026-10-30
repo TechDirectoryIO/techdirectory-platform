@@ -85,6 +85,13 @@ async function handleOrder(request, env) {
     return json({ error: "checks", message: "Please fix these before paying: " + hard.map((c) => c.label + (c.detail ? " (" + c.detail + ")" : "")).join("; ") + ".", checks: pre.checks }, 422);
   }
 
+  // 100% unique (owner, 30 October 2026): refuse text whose paragraphs were already published on TechDirectory.
+  for (const fp of await fingerprints(pre.cleanHtml)) {
+    if (await env.ORDERS.get("fp:" + fp)) {
+      return json({ error: "duplicate", message: "Part of this article has already been published on TechDirectory. Sponsored posts must be 100% unique." }, 422);
+    }
+  }
+
   if (!(await reservePlace(env))) {
     return json({ error: "full", message: "This week's sponsored-post places are taken. New places open on Monday; your draft is saved." }, 409);
   }
@@ -247,6 +254,7 @@ async function publish(env, rec, r) {
   });
   rec.status = "published";
   rec.publishedAt = now;
+  for (const fp of await fingerprints(r.cleanHtml)) await env.ORDERS.put("fp:" + fp, rec.id);
   rec.url = created.url || url;
   rec.tdPostId = created.id;
   await putOrder(env, rec);
@@ -394,6 +402,20 @@ async function email(env, to, subject, text) {
 }
 
 /* ---------- Helpers ---------- */
+
+// One fingerprint per paragraph of 25+ words (case, spacing and punctuation ignored), so a resubmitted
+// article is caught even if a sentence or two is changed elsewhere in it.
+export async function fingerprints(html) {
+  const paras = String(html).split(/<\/(?:p|li|blockquote|h2|h3)>/i)
+    .map((p) => p.replace(/<[^>]+>/g, " ").toLowerCase().replace(/[^a-z0-9à-ɏ\s]/g, " ").replace(/\s+/g, " ").trim())
+    .filter((p) => p.split(" ").length >= 25);
+  const out = [];
+  for (const p of new Set(paras)) {
+    const d = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(p)));
+    out.push([...d.slice(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join(""));
+  }
+  return out;
+}
 
 // Keys can live in Cloudflare's Secrets Store (account level, bound to this Worker) or as Worker secrets.
 // A Secrets Store binding is an object with get(); a Worker secret is a plain string. Both work.

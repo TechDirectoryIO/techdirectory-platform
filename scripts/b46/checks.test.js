@@ -51,10 +51,12 @@ r = run({ html: goodHtml.replace("our migration service", "read our very detaile
 t("Link text over 5 words is borderline", r.checks.find((c) => c.id === "anchors").result === "borderline");
 
 r = run({ html: `<p>Cloud software teams.</p><h2>x</h2><p>${para(200)}</p>` });
-t("Under 450 words is a hard fail", r.checks.find((c) => c.id === "length").result === "fail");
-r = run({ html: goodHtml.replace(para(220), para(20)).replace(para(300), para(200)) });
+t("Under 500 words is a hard fail", r.checks.find((c) => c.id === "length").result === "fail");
+r = run({ html: goodHtml + `<p>${para(2600)}</p>` });
 const lenC = r.checks.find((c) => c.id === "length");
-t("450–599 words is borderline", lenC.result === "borderline", lenC.detail);
+t("3,001–4,000 words goes to the queue", lenC.result === "borderline", lenC.detail);
+r = run({});
+t("500–999 words passes with the 1,000-word recommendation", r.checks.find((c) => c.id === "length").result === "pass" && (r.words >= 1000 || /1,000 or more recommended/.test(r.checks.find((c) => c.id === "length").detail)));
 
 r = run({ html: goodHtml + `<script>alert(1)</script>` });
 t("Pasted HTML with a script is cleaned and hard-fails", !/script/i.test(r.cleanHtml) && r.checks.find((c) => c.id === "html").result === "fail");

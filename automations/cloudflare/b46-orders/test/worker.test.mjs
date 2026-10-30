@@ -188,6 +188,12 @@ const reset = () => { calls = []; behaviour = {}; };
   const rec = await env.ORDERS.get("order:" + j.orderId, "json");
   t("Keys from Cloudflare's Secrets Store work the same as Worker secrets", rec.status === "published" && hit("api.brevo.com").length >= 1); }
 
+{ reset(); const env = makeEnv(); const first = await placeAndPay(env);
+  const again = await run(orderForm(), env); const j = await again.json();
+  const tweaked = await run(orderForm({ html: goodHtml.replace("carefully", "very carefully") }), env);
+  t("100% unique: the same article can't be sold twice", first.rec.status === "published" && again.status === 422 && /100% unique/.test(j.message));
+  t("100% unique: a lightly edited copy is still caught", tweaked.status === 422); }
+
 /* sanitiser and image header */
 const x = workerSanitizer.sanitize('<p>a<script>alert(1)</script><img src="javascript:alert(1)" onerror="x"><a href="javascript:alert(1)">b</a><iframe src="//e"></iframe><svg><script>1</script></svg><a href="https://ok.com" style="x" class="y">ok</a></p>', { ALLOWED_TAGS: Checks.RULES.allowedTags, ALLOWED_ATTR: Checks.RULES.allowedAttr });
 t("Sanitiser removes scripts, handlers, javascript: links, iframes, svg, styles", !/script|onerror|javascript|iframe|svg|style|class/i.test(x) && /href="https:\/\/ok.com"/.test(x), x);
