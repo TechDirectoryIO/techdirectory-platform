@@ -1,0 +1,3 @@
+{ "name": "td-billing", "private": true, "type": "module",
+  "description": "B70 plan payments on Stripe Checkout and Billing (Cloudflare Worker)",
+  "scripts": { "test": "node test/worker.test.mjs", "deploy": "wrangler deploy" } }
