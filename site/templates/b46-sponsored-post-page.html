@@ -279,10 +279,10 @@ window.TD_SP_CONFIG = {
     fd.append("currency", $("sp-currency").value); fd.append("policyAccepted", new Date().toISOString());
     fetch(cfg.orderEndpoint, { method: "POST", body: fd }).then(function (res) { return res.json(); }).then(function (j) {
       if (j && j.checkoutUrl) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} window.location.href = j.checkoutUrl; }
-      else throw new Error("no checkout");
-    }).catch(function () {
+      else { var e = new Error("no checkout"); e.userMessage = j && j.message; throw e; }
+    }).catch(function (e) {
       btn.disabled = false; btn.innerHTML = '<span>Pay <span data-td-price></span> and submit</span>'; setCurrency($("sp-currency").value);
-      err.textContent = "Something went wrong and you have not been charged. Your draft is saved; please try again in a few minutes.";
+      err.textContent = (e && e.userMessage) ? e.userMessage + " You have not been charged." : "Something went wrong and you have not been charged. Your draft is saved; please try again in a few minutes.";
     });
   });
 
