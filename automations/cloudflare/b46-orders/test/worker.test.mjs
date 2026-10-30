@@ -35,6 +35,11 @@ globalThis.fetch = async (input, init = {}) => {
   const ok = (j, s = 200) => new Response(JSON.stringify(j), { status: s, headers: { "Content-Type": "application/json" } });
   if (url.startsWith("https://api.stripe.com/v1/checkout/sessions")) return ok({ id: "cs_1", url: "https://checkout.stripe.com/c/pay/cs_1" });
   if (url.startsWith("https://api.stripe.com/v1/refunds")) return ok({ id: "re_1", status: "succeeded" });
+  if (url.startsWith("https://security.cloudflare-dns.com/dns-query")) {
+    if (behaviour.dnsDown) return new Response("", { status: 503 });
+    const host = decodeURIComponent(url.split("name=")[1].split("&")[0]);
+    return ok({ Status: 0, Answer: [{ name: host, type: 1, TTL: 60, data: behaviour.dnsBlocked === host ? "0.0.0.0" : "93.184.215.14" }] });
+  }
   if (url.startsWith("https://webrisk.googleapis.com")) return ok(behaviour.unsafe && url.includes(encodeURIComponent(behaviour.unsafe)) ? { threat: { threatTypes: ["MALWARE"] } } : {});
   if (url.startsWith("https://www.copyscape.com")) return ok({ count: 1, result: [{ url: "https://elsewhere.com/x", percentmatched: behaviour.copied || 0 }] });
   if (url.includes("/api/v2/data_posts/create")) return behaviour.tdDown ? ok({ status: "error", message: "down" }, 500) : ok({ status: "success", message: { post_id: 991 } });
@@ -150,7 +155,16 @@ const reset = () => { calls = []; behaviour = {}; };
   t("Check on but Copyscape not set up: queue, never published", rec.status === "queued" && !hit("data_posts").length); }
 
 { reset(); const env = makeEnv({ WEB_RISK_KEY: "" }); const { rec } = await placeAndPay(env);
-  t("Link-safety service not set up: queue, never published", rec.status === "queued" && !hit("data_posts").length, rec.queueReason); }
+  t("No Google key: Cloudflare's free malware check clears a safe link and the post is published", rec.status === "published" && hit("security.cloudflare-dns.com").length >= 1 && !hit("webrisk").length, rec.queueReason); }
+
+{ reset(); behaviour.dnsBlocked = "example.com"; const env = makeEnv({ WEB_RISK_KEY: "" }); const { rec } = await placeAndPay(env);
+  t("Link to a domain Cloudflare blocks as malware or phishing: full refund", rec.status === "refunded" && hit("refunds").length === 1 && !hit("data_posts").length); }
+
+{ reset(); behaviour.dnsDown = true; const env = makeEnv({ WEB_RISK_KEY: "" }); const { rec } = await placeAndPay(env);
+  t("No safety check could run: queue, never published", rec.status === "queued" && !hit("data_posts").length, rec.queueReason); }
+
+{ reset(); behaviour.dnsDown = true; const env = makeEnv(); const { rec } = await placeAndPay(env);
+  t("Cloudflare check down but Google key set: Google's answer is used", rec.status === "published", rec.queueReason); }
 
 { reset(); behaviour.linkStatus = 404; const env = makeEnv(); const { rec } = await placeAndPay(env);
   t("Link not responding: owner's queue", rec.status === "queued"); }
@@ -162,7 +176,7 @@ const reset = () => { calls = []; behaviour = {}; };
   await run(await signed(env, paidEvent(j.orderId)), env); const rec = await env.ORDERS.get("order:" + j.orderId, "json");
   t("Paid while paused: queued, not published", rec.status === "queued"); }
 
-{ reset(); const env = makeEnv({ WEB_RISK_KEY: "" }); const { j } = await placeAndPay(env);
+{ reset(); behaviour.dnsDown = true; const env = makeEnv({ WEB_RISK_KEY: "" }); const { j } = await placeAndPay(env);
   const noAuth = await run(new Request("https://orders.techdirectory.io/queue"), env);
   const auth = { authorization: "Bearer " + ADMIN };
   const list = await (await run(new Request("https://orders.techdirectory.io/queue", { headers: auth }), env)).json();

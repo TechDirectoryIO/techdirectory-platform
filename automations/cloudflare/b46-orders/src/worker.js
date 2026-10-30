@@ -188,7 +188,7 @@ async function networkChecks(env, order) {
     const host = safeHost(u);
     links[u] = {
       status: await linkStatus(u),
-      safe: await webRiskSafe(env, u),
+      safe: await linkSafe(env, u),
       rejectedBefore: host ? !!(await env.ORDERS.get("rejdomain:" + host)) : false,
     };
   }
@@ -203,14 +203,42 @@ async function linkStatus(u) {
   } catch { return 0; }
 }
 
+// Link safety, free by default (owner, 30 Oct 2026: no budget for a card on Google Cloud yet):
+//  - Cloudflare's malware-blocking resolver (1.1.1.2, "security.cloudflare-dns.com") answers 0.0.0.0 for
+//    domains it knows to be malware or phishing. No key, no account, no cost. Domain-level only.
+//  - Google Web Risk is added on top when WEB_RISK_KEY is set (page-level, needs Cloud billing).
+// A link counts as safe only if every check that ran says so; if none could run, it is "not checked" (borderline).
+async function linkSafe(env, u) {
+  const results = [await dnsSafe(u)];
+  if (env.WEB_RISK_KEY) results.push(await webRiskSafe(env, u));
+  if (results.includes(false)) return false;
+  return results.includes(true) ? true : undefined;
+}
+
+async function dnsSafe(u) {
+  const host = safeHost(u);
+  if (!host) return undefined;
+  try {
+    const r = await fetch("https://security.cloudflare-dns.com/dns-query?name=" + encodeURIComponent(host) + "&type=A",
+      { headers: { accept: "application/dns-json" }, signal: AbortSignal.timeout(5000) });
+    if (!r.ok) return undefined;
+    const j = await r.json();
+    if (j.Status !== 0) return undefined; // e.g. the domain doesn't exist: the link check catches it
+    const ips = (j.Answer || []).filter((a) => a.type === 1).map((a) => a.data);
+    if (ips.includes("0.0.0.0")) return false; // blocked as malware or phishing
+    return ips.length ? true : undefined;
+  } catch { return undefined; }
+}
+
 async function webRiskSafe(env, u) {
-  if (!env.WEB_RISK_KEY) return undefined; // not checked -> borderline
   const q = new URLSearchParams({ uri: u, key: env.WEB_RISK_KEY });
   for (const t of ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"]) q.append("threatTypes", t);
-  const r = await fetch("https://webrisk.googleapis.com/v1/uris:search?" + q, { signal: AbortSignal.timeout(8000) });
-  if (!r.ok) return undefined;
-  const j = await r.json();
-  return !(j && j.threat);
+  try {
+    const r = await fetch("https://webrisk.googleapis.com/v1/uris:search?" + q, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return undefined;
+    const j = await r.json();
+    return !(j && j.threat);
+  } catch { return undefined; }
 }
 
 async function originality(env, order) {

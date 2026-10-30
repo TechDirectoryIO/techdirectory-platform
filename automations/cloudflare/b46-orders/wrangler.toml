@@ -1,7 +1,7 @@
 # B46 order Worker (Cloudflare free plan). No secrets in this file.
 # Keys live in Cloudflare's Secrets Store (account level) and are bound below, or as Worker secrets
 # (npx wrangler secret put <NAME>). The code accepts either.
-#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TD_API_KEY, WEB_RISK_KEY,
+#   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TD_API_KEY, WEB_RISK_KEY (optional: link safety works without it),
 #   COPYSCAPE_USER, COPYSCAPE_KEY, INDEXNOW_KEY, BREVO_API_KEY, ADMIN_TOKEN (40+ random characters)
 name = "td-b46-orders"
 main = "src/worker.js"
