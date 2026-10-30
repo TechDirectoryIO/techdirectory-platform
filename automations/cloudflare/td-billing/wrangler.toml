@@ -1,0 +1,35 @@
+# B70 plan payments (Cloudflare free plan). No secrets in this file.
+name = "td-billing"
+main = "src/worker.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "BILLING"
+id = "SET_AT_GO_LIVE"   # KV namespace "td-billing" (Stripe event IDs already handled)
+
+[vars]
+SITE_URL = "https://www.techdirectory.io"
+ALLOWED_ORIGIN = "https://www.techdirectory.io"
+PORTAL_LOGIN_URL = "SET_AT_GO_LIVE"   # Stripe → Settings → Billing → Customer portal → login link
+# Stripe price IDs, "plan:interval:currency". Live prices today: Featured $29, Premium $49 (Legacy).
+# The approved new prices (Featured $29/£24/€27, Premium $79/£64/€74, Growth $149/£119/€139; annual = 10 x monthly)
+# are added when sales open (Build Scope 24.1, 16.1).
+PLANS = "{}"
+# TD platform membership plan IDs (basic is where cancelled members go). Read from Finance → Membership Plans in the window.
+TD_PLAN_IDS = "{}"
+
+[[secrets_store_secrets]]
+binding = "STRIPE_SECRET_KEY"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "STRIPE_SECRET_KEY"
+
+[[secrets_store_secrets]]
+binding = "STRIPE_BILLING_WEBHOOK_SECRET"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "STRIPE_BILLING_WEBHOOK_SECRET"
+
+[[secrets_store_secrets]]
+binding = "TD_API_KEY"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "TD_API_KEY"

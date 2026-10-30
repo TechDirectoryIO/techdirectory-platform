@@ -1,0 +1,52 @@
+<!--
+  B70 · "Upgrade" buttons for the pricing page and the member dashboard (TD widget "TD Upgrade v1").
+  Each button opens Stripe's payment page for that plan: card, Apple Pay, Google Pay, Link, PayPal or
+  Direct Debit, in the visitor's currency. If a card is declined, the buyer simply tries another way;
+  nothing has to be filled in again.
+
+  Before go-live:
+    - set TD_UPGRADE.endpoint to the td-billing Worker address;
+    - set TD_UPGRADE.memberId from the platform's signed-in member variable (blank when signed out:
+      the button then sends people to sign up first).
+-->
+<script>
+window.TD_UPGRADE = window.TD_UPGRADE || { endpoint: "", memberId: "", signupUrl: "/join", manageUrl: "" };
+</script>
+<div class="td-up" data-nosnippet>
+  <p class="td-up__ways">Pay by card, Apple Pay, Google Pay, PayPal or Direct Debit. Secure payment by Stripe. Cancel any time.</p>
+  <p class="td-up__error" role="alert" hidden></p>
+  <!-- Example buttons; the pricing page sets data-plan / data-interval on its own buttons -->
+  <button type="button" class="td-up__btn" data-td-upgrade data-plan="featured" data-interval="month">Upgrade to Featured</button>
+  <button type="button" class="td-up__btn" data-td-upgrade data-plan="premium" data-interval="month">Upgrade to Premium</button>
+  <p class="td-up__manage" hidden><a data-td-manage href="#">Manage billing, change card or cancel</a></p>
+</div>
+<style>
+  .td-up__btn{min-height:44px;padding:10px 18px;border:0;border-radius:8px;background:#a3d03c;color:#1f3d1a;font:600 16px Arial,sans-serif;cursor:pointer;margin:4px 8px 4px 0}
+  .td-up__btn[disabled]{opacity:.6;cursor:wait}
+  .td-up__ways{font:14px Arial,sans-serif;color:#4a5568;margin:0 0 8px}
+  .td-up__error{color:#b42318;font:14px Arial,sans-serif}
+</style>
+<script>
+(function () {
+  var cfg = window.TD_UPGRADE;
+  function currency() { try { return localStorage.getItem("td-currency") || "USD"; } catch (e) { return "USD"; } }
+  var err = document.querySelector(".td-up__error");
+  if (cfg.manageUrl && cfg.memberId) {
+    var m = document.querySelector(".td-up__manage"); m.hidden = false;
+    m.querySelector("[data-td-manage]").href = cfg.manageUrl;
+  }
+  document.querySelectorAll("[data-td-upgrade]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      err.hidden = true;
+      if (!cfg.memberId) { window.location.href = cfg.signupUrl + "?next=" + encodeURIComponent(location.pathname); return; }
+      if (!cfg.endpoint) { err.textContent = "Online payment opens soon."; err.hidden = false; return; }
+      var label = btn.textContent; btn.disabled = true; btn.textContent = "Opening secure payment…";
+      fetch(cfg.endpoint + "/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: btn.dataset.plan, interval: btn.dataset.interval || "month", currency: currency(), memberId: cfg.memberId }) })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { if (j.url) { window.location.href = j.url; } else { throw new Error(j.message || "error"); } })
+        .catch(function (e) { btn.disabled = false; btn.textContent = label; err.textContent = (e && e.message && e.message !== "error") ? e.message : "Something went wrong and you have not been charged. Please try again."; err.hidden = false; });
+    });
+  });
+})();
+</script>
