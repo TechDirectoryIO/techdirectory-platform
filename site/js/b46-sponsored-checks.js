@@ -16,7 +16,7 @@
  *   image: { width },                  // featured image width in px
  *   network: {                         // filled in after payment; missing = borderline
  *     links: { "<url>": { status: 200, safe: true, rejectedBefore: false } },
- *     originality: "none" | "partial" | "exact"
+ *     originality: "off" | "none" | "partial" | "exact"   // "off" = check switched off by the owner
  *   },
  *   history: { refusals12m: 0 }        // refused or unpublished posts from this email/domain
  * }
@@ -103,6 +103,10 @@
     var hadStyles = /\sstyle\s*=/i.test(raw) || /\sclass\s*=/i.test(raw);
     var clean = DOMPurify.sanitize(raw, { ALLOWED_TAGS: RULES.allowedTags, ALLOWED_ATTR: RULES.allowedAttr,
       ALLOWED_URI_REGEXP: /^(?:https?:|\/|#)/i });
+    /* fail closed: a sanitiser that isn't working (e.g. no DOM) returns the input unchanged */
+    if (/<\s*(script|iframe|object|embed|form|style)\b|\son[a-z]+\s*=|javascript\s*:/i.test(clean)) {
+      throw new Error("TD sanitiser check failed: unsafe HTML survived cleaning");
+    }
     /* every link: rel="sponsored noopener" and a new tab, whatever the writer typed */
     clean = clean.replace(/<a\b([^>]*)>/gi, function (m, attrs) {
       var href = (attrs.match(/\shref="([^"]*)"/i) || [])[1];
@@ -176,21 +180,24 @@
     if (!links.length) add("safety", "Link safety", "pass", "No links");
     else if (!net || !net.links) add("safety", "Link safety", "borderline", "Not checked yet");
     else {
-      var bad = [], down = [];
+      var bad = [], down = [], unchecked = [];
       links.forEach(function (l) {
         var r = net.links[l.url];
         if (!r) { down.push(l.url); return; }
         if (r.safe === false || r.rejectedBefore) bad.push(l.url);
+        else if (r.safe !== true) unchecked.push(l.url);          /* safety lookup missing or failed: never assume safe */
         else if (!(r.status >= 200 && r.status < 400)) down.push(l.url);
       });
       if (bad.length) add("safety", "Link safety", "fail", "Unsafe or previously rejected: " + bad.join(", "));
+      else if (unchecked.length) add("safety", "Link safety", "borderline", "Safety not checked: " + unchecked.join(", "));
       else if (down.length) add("safety", "Link safety", "borderline", "Not responding: " + down.join(", "));
       else add("safety", "Link safety", "pass", "");
     }
 
     /* Originality */
     var orig = net && net.originality;
-    if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
+    if (orig === "off") add("originality", "Originality", "pass", "Not checked: copied text is allowed (owner decision, 30 October 2026)");
+    else if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
     else if (orig === "none") add("originality", "Originality", "pass", "");
     else add("originality", "Originality", "borderline", orig === "partial" ? "Partial match found" : "Not checked yet");
 

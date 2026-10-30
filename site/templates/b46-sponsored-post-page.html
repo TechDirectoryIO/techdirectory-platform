@@ -130,13 +130,13 @@ window.TD_SP_CONFIG = {
 
         <section class="td-sp__panel" aria-labelledby="td-sp-checks-h">
           <h2 id="td-sp-checks-h">Publishing checks</h2>
-          <p class="td-sp__note" style="margin-top:0">These update as you write. Link safety and originality are checked after you pay.</p>
+          <p class="td-sp__note" style="margin-top:0">These update as you write. Link safety is checked after you pay.</p>
           <ul id="td-sp-checks" class="td-sp__checks"></ul>
         </section>
 
         <section class="td-sp__panel">
           <label class="td-sp__consent"><input id="sp-consent" type="checkbox" required>
-            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. My article is original, I have the right to use its image, and I understand it will be labelled "Sponsored".</span></label>
+            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. I have the right to publish this article and its image, and I understand it will be labelled "Sponsored".</span></label>
           <p id="sp-form-error" class="td-sp__error" role="alert"></p>
           <button id="sp-submit" class="td-sp__btn" type="submit"><span>Pay <span data-td-price>$199</span> and submit</span></button>
           <p class="td-sp__note"><b>Refunds.</b> If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>.</p>
@@ -279,10 +279,10 @@ window.TD_SP_CONFIG = {
     fd.append("currency", $("sp-currency").value); fd.append("policyAccepted", new Date().toISOString());
     fetch(cfg.orderEndpoint, { method: "POST", body: fd }).then(function (res) { return res.json(); }).then(function (j) {
       if (j && j.checkoutUrl) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} window.location.href = j.checkoutUrl; }
-      else throw new Error("no checkout");
-    }).catch(function () {
+      else { var e = new Error("no checkout"); e.userMessage = j && j.message; throw e; }
+    }).catch(function (e) {
       btn.disabled = false; btn.innerHTML = '<span>Pay <span data-td-price></span> and submit</span>'; setCurrency($("sp-currency").value);
-      err.textContent = "Something went wrong and you have not been charged. Your draft is saved; please try again in a few minutes.";
+      err.textContent = (e && e.userMessage) ? e.userMessage + " You have not been charged." : "Something went wrong and you have not been charged. Your draft is saved; please try again in a few minutes.";
     });
   });
 

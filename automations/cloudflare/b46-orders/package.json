@@ -1,0 +1,14 @@
+{
+  "name": "td-b46-orders",
+  "private": true,
+  "type": "module",
+  "description": "B46 sponsored-post orders: Stripe Checkout, after-payment checks, publish or refund (Cloudflare Worker)",
+  "scripts": {
+    "test": "node test/worker.test.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "xss": "1.0.15"
+  },
+  "devDependencies": {}
+}

@@ -21,7 +21,7 @@
 >
 > Submit your article and pay here: **techdirectory.io/sponsored-post**
 >
-> Guidelines: 600–1,500 original words on a technology or business-technology topic, up to 2 links, one image. We don't accept gambling, adult, crypto, investment or loan content.
+> Guidelines: 600–1,500 words on a technology or business-technology topic, up to 2 links, one image. We don't accept gambling, adult, crypto, investment or loan content.
 >
 > For wider coverage, our partner publication TechBullion offers sponsored articles from $600.
 >
