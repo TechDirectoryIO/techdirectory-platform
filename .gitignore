@@ -1,0 +1,23 @@
+# Secrets and local config
+.env
+.env.*
+*.pem
+*.key
+secrets*
+credentials*
+
+# Data exports (never commit member or customer data)
+*.csv
+*.xlsx
+exports/
+
+# Video and large media (store elsewhere)
+*.mp4
+*.mov
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
