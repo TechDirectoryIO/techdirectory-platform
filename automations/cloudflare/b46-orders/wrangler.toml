@@ -1,5 +1,6 @@
 # B46 order Worker (Cloudflare free plan). No secrets in this file.
-# Secrets are added once with: npx wrangler secret put <NAME>
+# Keys live in Cloudflare's Secrets Store (account level) and are bound below, or as Worker secrets
+# (npx wrangler secret put <NAME>). The code accepts either.
 #   STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TD_API_KEY, WEB_RISK_KEY,
 #   COPYSCAPE_USER, COPYSCAPE_KEY, INDEXNOW_KEY, BREVO_API_KEY, ADMIN_TOKEN (40+ random characters)
 name = "td-b46-orders"
@@ -24,7 +25,15 @@ WEEKLY_CAP = "15"
 TD_POST_TYPE_ID = "SET_AT_GO_LIVE"     # TD post type for sponsored posts
 TD_AUTHOR_USER_ID = "SET_AT_GO_LIVE"   # TD account that owns sponsored posts
 TD_POST_PATH = "/sponsored/"
+ORIGINALITY_CHECK = "off"             # owner, 30 Oct 2026: copied text allowed; "on" needs Copyscape keys
 ORIGINALITY_FAIL_PCT = "40"            # match elsewhere at or above this: refund
 ORIGINALITY_FLAG_PCT = "10"            # at or above this: owner's queue
 OWNER_EMAIL = "SET_AT_GO_LIVE"
 SENDER_EMAIL = "info@techdirectory.io"
+
+# Secrets Store bindings (store ID from the Secrets Store page; the secret names match the code)
+# [[secrets_store_secrets]]
+# binding = "BREVO_API_KEY"
+# store_id = "SET_AT_GO_LIVE"
+# secret_name = "BREVO_API_KEY"
+# (repeat for WEB_RISK_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TD_API_KEY, INDEXNOW_KEY, ADMIN_TOKEN)

@@ -14,7 +14,7 @@ TechDirectory publishes a limited number of sponsored posts on technology and bu
 
 ### Who we are
 
-TechDirectory (techdirectory.io) is operated by VTC Group Ltd, a company registered in England and Wales, company number 15887782, registered office 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, United Kingdom.
+TechDirectory, 71-75 Shelton Street, London WC2H 9JQ. Our full company details are in the [Terms of Use](/about/terms).
 
 ### What you buy
 
@@ -33,7 +33,7 @@ Sponsored posts are sold to businesses only. You must give your company name whe
 
 ### What a post must be
 
-- Original and not published anywhere else, including your own site.
+- Yours to publish: you may publish the same article elsewhere, such as a press release on your own site.
 - About a technology or business-technology topic that is relevant to people who buy technology for their organisations.
 - Accurate. No claims you cannot support, no claims about other named companies, and no fake reviews or testimonials.
 - Mainly useful to the reader, not written mainly to carry links.
@@ -44,10 +44,10 @@ Gambling and betting; adult content; crypto-assets, tokens and crypto trading; i
 
 ### How your post is reviewed
 
-Every post goes through automatic checks before it is published: length, number and safety of links, link wording, banned topics, originality, relevance, language and format, clean formatting, and your order history with us.
+Every post goes through automatic checks before it is published: length, number and safety of links, link wording, banned topics, relevance, language and format, clean formatting, and your order history with us.
 
 - **All checks pass:** your post is published automatically, usually within minutes, and we email you the live link.
-- **A check fails clearly** (for example a banned topic, more than 2 links, an unsafe link or copied text): we do not publish it, we refund you in full automatically, and we tell you why. You can resubmit a corrected post once, free of charge, within 30 days.
+- **A check fails clearly** (for example a banned topic, more than 2 links or an unsafe link): we do not publish it, we refund you in full automatically, and we tell you why. You can resubmit a corrected post once, free of charge, within 30 days.
 - **A check is borderline:** a person reviews your post within 3 working days and either publishes it or declines it with a full refund.
 
 Publication is never guaranteed until your post is live. Paying does not oblige us to publish content that breaks this policy.
@@ -91,14 +91,15 @@ This policy is governed by the laws of England and Wales. Nothing in it limits a
 
 ## Tick box at checkout (unticked by default)
 
-> I have read and accept the [sponsored content policy](/sponsored-content-policy). My article is original, I have the right to use its image, and I understand it will be labelled "Sponsored".
+> I have read and accept the [sponsored content policy](/sponsored-content-policy). I have the right to publish this article and its image, and I understand it will be labelled "Sponsored".
 
 ## Decisions (30 October 2026)
 
-The owner asked the builder to make these calls. Points 2 to 5 are decided as written in this policy; point 1 is filled in from Companies House and needs the owner's one-word confirmation before the page goes live.
+The owner asked the builder to make these calls. All points are decided.
 
-1. **Company details: owner to confirm.** VTC Group Ltd, company number 15887782, registered office 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ (Companies House, incorporated 9 August 2024). UK law requires these on the page. Support address: info@techdirectory.io (an existing TechDirectory mailbox, so nothing new to set up).
+1. **Company details: confirmed by the owner (30 October).** The page shows the short form "TechDirectory, 71-75 Shelton Street, London WC2H 9JQ" and links to the Terms of Use, which carry the full legal details (VTC Group Ltd, company number 15887782, registered in England and Wales) as UK law requires once on the website. Support address: info@techdirectory.io.
 2. **Free resubmission within 30 days** after a clear fail: decided, yes. A time limit stops old orders coming back months later.
 3. **Full refund if we remove a post within 12 months** for our own reasons: decided, yes. We promise 12 months, so breaking that must cost us, not the buyer.
 4. **One free correction within 30 days**: decided, yes. Typos and broken links to the buyer's own site only; costs minutes and avoids disputes.
 5. **Business buyers only**: decided, yes. Keeps consumer cancellation rights and foreign VAT out of scope.
+6. **Copied text is allowed** (owner, 30 October): companies often publish the same press release in several places, so there is no originality check for now. It can be switched back on once revenue pays for it.

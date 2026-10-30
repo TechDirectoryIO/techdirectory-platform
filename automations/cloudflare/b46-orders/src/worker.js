@@ -25,6 +25,7 @@ const RESERVE_MINUTES = 35; // Stripe Checkout link lives 30 minutes
 
 export default {
   async fetch(request, env, ctx) {
+    env = await resolveSecrets(env);
     const url = new URL(request.url);
     const cors = corsHeaders(env, request);
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
@@ -202,7 +203,10 @@ async function webRiskSafe(env, u) {
 }
 
 async function originality(env, order) {
-  if (!env.COPYSCAPE_USER || !env.COPYSCAPE_KEY) return undefined; // not checked -> borderline
+  // Owner decision, 30 October 2026: copied text is allowed (press releases are often published in several places),
+  // so the check is off until ORIGINALITY_CHECK = "on" and Copyscape keys are added.
+  if (env.ORIGINALITY_CHECK !== "on") return "off";
+  if (!env.COPYSCAPE_USER || !env.COPYSCAPE_KEY) return undefined; // switched on but not set up -> borderline
   const text = order.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   const body = new URLSearchParams({ u: env.COPYSCAPE_USER, k: env.COPYSCAPE_KEY, o: "csearch", e: "UTF-8", f: "json", t: text });
   const r = await fetch("https://www.copyscape.com/api/", { method: "POST", body, signal: AbortSignal.timeout(20000) });
@@ -390,6 +394,21 @@ async function email(env, to, subject, text) {
 }
 
 /* ---------- Helpers ---------- */
+
+// Keys can live in Cloudflare's Secrets Store (account level, bound to this Worker) or as Worker secrets.
+// A Secrets Store binding is an object with get(); a Worker secret is a plain string. Both work.
+const SECRET_NAMES = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "TD_API_KEY", "WEB_RISK_KEY", "COPYSCAPE_USER",
+  "COPYSCAPE_KEY", "INDEXNOW_KEY", "BREVO_API_KEY", "ADMIN_TOKEN"];
+export async function resolveSecrets(env) {
+  const out = { ...env };
+  for (const n of SECRET_NAMES) {
+    const v = env[n];
+    if (v && typeof v === "object" && typeof v.get === "function") {
+      try { out[n] = await v.get(); } catch { out[n] = ""; } // missing secret = service treated as not set up
+    }
+  }
+  return out;
+}
 
 async function verifyStripe(payload, header, secret) {
   if (!header || !secret) return false;

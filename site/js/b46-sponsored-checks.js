@@ -16,7 +16,7 @@
  *   image: { width },                  // featured image width in px
  *   network: {                         // filled in after payment; missing = borderline
  *     links: { "<url>": { status: 200, safe: true, rejectedBefore: false } },
- *     originality: "none" | "partial" | "exact"
+ *     originality: "off" | "none" | "partial" | "exact"   // "off" = check switched off by the owner
  *   },
  *   history: { refusals12m: 0 }        // refused or unpublished posts from this email/domain
  * }
@@ -196,7 +196,8 @@
 
     /* Originality */
     var orig = net && net.originality;
-    if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
+    if (orig === "off") add("originality", "Originality", "pass", "Not checked: copied text is allowed (owner decision, 30 October 2026)");
+    else if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
     else if (orig === "none") add("originality", "Originality", "pass", "");
     else add("originality", "Originality", "borderline", orig === "partial" ? "Partial match found" : "Not checked yet");
 

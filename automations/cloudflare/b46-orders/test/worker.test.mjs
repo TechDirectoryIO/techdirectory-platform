@@ -138,13 +138,16 @@ const reset = () => { calls = []; behaviour = {}; };
   t("Domain remembered: next order with it fails", !!(await env.ORDERS.get("rejdomain:example.com"))); }
 
 { reset(); behaviour.copied = 85; const env = makeEnv(); const { rec } = await placeAndPay(env);
-  t("Copied article (85% match elsewhere): refunded", rec.status === "refunded"); }
+  t("Copied-text check off by default: a press release published elsewhere still goes live", rec.status === "published" && !hit("copyscape").length); }
 
-{ reset(); behaviour.copied = 20; const env = makeEnv(); const { rec } = await placeAndPay(env);
+{ reset(); behaviour.copied = 85; const env = makeEnv({ ORIGINALITY_CHECK: "on" }); const { rec } = await placeAndPay(env);
+  t("Check switched on: copied article (85% match) refunded", rec.status === "refunded"); }
+
+{ reset(); behaviour.copied = 20; const env = makeEnv({ ORIGINALITY_CHECK: "on" }); const { rec } = await placeAndPay(env);
   t("Partial match (20%): owner's queue, no refund, not published", rec.status === "queued" && !hit("refunds").length && !hit("data_posts").length); }
 
-{ reset(); const env = makeEnv({ COPYSCAPE_KEY: "" }); const { rec } = await placeAndPay(env);
-  t("Originality service not set up: queue, never published", rec.status === "queued" && !hit("data_posts").length); }
+{ reset(); const env = makeEnv({ COPYSCAPE_KEY: "", ORIGINALITY_CHECK: "on" }); const { rec } = await placeAndPay(env);
+  t("Check on but Copyscape not set up: queue, never published", rec.status === "queued" && !hit("data_posts").length); }
 
 { reset(); const env = makeEnv({ WEB_RISK_KEY: "" }); const { rec } = await placeAndPay(env);
   t("Link-safety service not set up: queue, never published", rec.status === "queued" && !hit("data_posts").length, rec.queueReason); }
@@ -159,7 +162,7 @@ const reset = () => { calls = []; behaviour = {}; };
   await run(await signed(env, paidEvent(j.orderId)), env); const rec = await env.ORDERS.get("order:" + j.orderId, "json");
   t("Paid while paused: queued, not published", rec.status === "queued"); }
 
-{ reset(); const env = makeEnv({ COPYSCAPE_KEY: "" }); const { j } = await placeAndPay(env);
+{ reset(); const env = makeEnv({ WEB_RISK_KEY: "" }); const { j } = await placeAndPay(env);
   const noAuth = await run(new Request("https://orders.techdirectory.io/queue"), env);
   const auth = { authorization: "Bearer " + ADMIN };
   const list = await (await run(new Request("https://orders.techdirectory.io/queue", { headers: auth }), env)).json();
@@ -177,6 +180,13 @@ const reset = () => { calls = []; behaviour = {}; };
 { reset(); const env = makeEnv({ BREVO_API_KEY: "" }); const { rec } = await placeAndPay(env);
   const out = [...env.ORDERS.m.keys()].filter((k) => k.startsWith("outbox:"));
   t("Without Brevo set up, emails wait in an outbox (nothing lost)", rec.status === "published" && out.length === 1 && !hit("brevo").length); }
+
+{ reset(); const store = (v) => ({ get: async () => v });
+  const env = makeEnv({ BREVO_API_KEY: store("b"), WEB_RISK_KEY: store("wr"), STRIPE_SECRET_KEY: store("sk_test_x"), STRIPE_WEBHOOK_SECRET: store(SECRET), ADMIN_TOKEN: store(ADMIN), TD_API_KEY: store("td"), INDEXNOW_KEY: store("0123456789abcdef0123456789abcdef") });
+  const r = await run(orderForm(), env); const j = await r.json();
+  await run(await signed(env, paidEvent(j.orderId)), env);
+  const rec = await env.ORDERS.get("order:" + j.orderId, "json");
+  t("Keys from Cloudflare's Secrets Store work the same as Worker secrets", rec.status === "published" && hit("api.brevo.com").length >= 1); }
 
 /* sanitiser and image header */
 const x = workerSanitizer.sanitize('<p>a<script>alert(1)</script><img src="javascript:alert(1)" onerror="x"><a href="javascript:alert(1)">b</a><iframe src="//e"></iframe><svg><script>1</script></svg><a href="https://ok.com" style="x" class="y">ok</a></p>', { ALLOWED_TAGS: Checks.RULES.allowedTags, ALLOWED_ATTR: Checks.RULES.allowedAttr });
