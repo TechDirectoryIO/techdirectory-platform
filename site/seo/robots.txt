@@ -1,0 +1,105 @@
+# TechDirectory robots.txt (Build Scope 35.3, B59). Owner approved 30 October 2026.
+# Reviewed every quarter. Source: github.com/TechDirectoryIO/techdirectory-platform site/seo/robots.txt
+#
+# Search and AI answer bots: allowed everywhere except the /api/ endpoint.
+# AI training bots: homepage, guides, Resources and Help Centre only.
+# Any bot not named here gets the same access as training bots, so bulk data
+# crawlers can't read listings. Bots that ignore this file are handled by
+# Cloudflare (26.4): bot fight mode and 60 page views a minute on listings.
+
+Sitemap: https://www.techdirectory.io/filedata/cache/xml-sitemaps/sitemap.xml
+
+# --- Search engines and AI search / answer bots: everywhere ---
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Googlebot-News
+User-agent: Mediapartners-Google
+User-agent: Bingbot
+User-agent: Msnbot
+User-agent: MSNBot-media
+User-agent: Applebot
+User-agent: DuckDuckBot
+User-agent: YandexBot
+User-agent: SeznamBot
+User-agent: Yeti
+User-agent: Slurp
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: Twitterbot
+User-agent: LinkedInBot
+User-agent: facebookexternalhit
+User-agent: Slackbot
+User-agent: Slackbot-LinkExpanding
+User-agent: WhatsApp
+User-agent: Discordbot
+User-agent: TelegramBot
+Allow: /
+Disallow: /api/
+
+# --- AI training bots: homepage, guides, Resources and Help Centre only ---
+# Listings, results pages and Data API documentation share no path prefix
+# with these sections, so everything else is closed.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: Claude-Web
+User-agent: CCBot
+User-agent: Google-Extended
+User-agent: GoogleOther
+User-agent: Google-CloudVertexBot
+User-agent: Applebot-Extended
+User-agent: Meta-ExternalAgent
+User-agent: Amazonbot
+User-agent: Bytespider
+User-agent: cohere-ai
+User-agent: cohere-training-data-crawler
+User-agent: Diffbot
+User-agent: omgili
+User-agent: MistralAI-Training
+User-agent: KimiBot
+User-agent: Cotoyogi
+User-agent: ICC-Crawler
+Allow: /$
+Allow: /blog$
+Allow: /blog/
+Allow: /guides$
+Allow: /guides/
+Allow: /resources$
+Allow: /resources/
+Allow: /help$
+Allow: /help/
+Disallow: /
+
+# --- Other crawlers blocked today (unchanged from the Cloudflare list) ---
+User-agent: Baiduspider
+User-agent: PetalBot
+User-agent: AwarioSmartBot
+User-agent: AwarioRssBot
+User-agent: QualifiedBot
+User-agent: atlassian-bot
+User-agent: FishBot
+User-agent: BorderxBot
+User-agent: NavuBot
+User-agent: SemrushBot-SWA
+User-agent: WARDBot
+User-agent: magpie-crawler
+User-agent: CitibotSiteCrawler
+Disallow: /
+
+# --- Everyone else: homepage, guides, Resources and Help Centre only ---
+User-agent: *
+Content-Signal: search=yes, ai-input=yes
+Allow: /$
+Allow: /blog$
+Allow: /blog/
+Allow: /guides$
+Allow: /guides/
+Allow: /resources$
+Allow: /resources/
+Allow: /help$
+Allow: /help/
+Disallow: /
