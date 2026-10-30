@@ -14,7 +14,7 @@ TechDirectory publishes a limited number of sponsored posts on technology and bu
 
 ### Who we are
 
-TechDirectory (techdirectory.io) is operated by [operating company legal name], a company registered in England and Wales, company number [number], registered office [address].
+TechDirectory (techdirectory.io) is operated by VTC Group Ltd, a company registered in England and Wales, company number 15887782, registered office 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ, United Kingdom.
 
 ### What you buy
 
@@ -54,7 +54,7 @@ Publication is never guaranteed until your post is live. Paying does not oblige 
 
 ### After publication
 
-- You can ask for one correction (a typo, a changed product name or a broken link to your own site) within 30 days, free of charge. Send it by email to [support address]. We do not make other changes.
+- You can ask for one correction (a typo, a changed product name or a broken link to your own site) within 30 days, free of charge. Send it by email to info@techdirectory.io. We do not make other changes.
 - If one of your links later points to content that breaks this policy, or stops working, we may remove that link or unpublish the post.
 - We may remove a post at any time if we learn it breaks this policy or the law.
 
@@ -77,7 +77,7 @@ Sponsored links carry `rel="sponsored"`, so they do not pass search ranking. We 
 
 ### Questions and complaints
 
-Write to [support address]. We reply within 1 working day. We do not take orders or handle questions by phone.
+Write to info@techdirectory.io. We reply within 1 working day. We do not take orders or handle questions by phone.
 
 ### Law
 
@@ -93,10 +93,12 @@ This policy is governed by the laws of England and Wales. Nothing in it limits a
 
 > I have read and accept the [sponsored content policy](/sponsored-content-policy). My article is original, I have the right to use its image, and I understand it will be labelled "Sponsored".
 
-## Decisions the owner should confirm
+## Decisions (30 October 2026)
 
-1. **Operating company details** for "Who we are" (legal name, company number, registered office) and the **support address**.
-2. **Free resubmission within 30 days** after a clear fail (Build Scope 28.1 says "one free resubmission" without a time limit).
-3. **Full refund if we remove a post within 12 months** for our own reasons (Build Scope 28.1 promises at least 12 months live but does not say what happens if we break that).
-4. **One free correction within 30 days** after publication (not in the Build Scope).
-5. **Business buyers only** at checkout (Build Scope 17.12), which keeps consumer-law cancellation rights and foreign VAT out of scope.
+The owner asked the builder to make these calls. Points 2 to 5 are decided as written in this policy; point 1 is filled in from Companies House and needs the owner's one-word confirmation before the page goes live.
+
+1. **Company details: owner to confirm.** VTC Group Ltd, company number 15887782, registered office 71-75 Shelton Street, Covent Garden, London, WC2H 9JQ (Companies House, incorporated 9 August 2024). UK law requires these on the page. Support address: info@techdirectory.io (an existing TechDirectory mailbox, so nothing new to set up).
+2. **Free resubmission within 30 days** after a clear fail: decided, yes. A time limit stops old orders coming back months later.
+3. **Full refund if we remove a post within 12 months** for our own reasons: decided, yes. We promise 12 months, so breaking that must cost us, not the buyer.
+4. **One free correction within 30 days**: decided, yes. Typos and broken links to the buyer's own site only; costs minutes and avoids disputes.
+5. **Business buyers only**: decided, yes. Keeps consumer cancellation rights and foreign VAT out of scope.
