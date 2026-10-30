@@ -196,7 +196,7 @@
 
     /* Originality */
     var orig = net && net.originality;
-    if (orig === "off") add("originality", "Originality", "pass", "Not checked: copied text is allowed (owner decision, 30 October 2026)");
+    if (orig === "off") add("originality", "Originality", "pass", "Not checked: buyer confirms the post is their own content (owner decision, 30 October 2026)");
     else if (orig === "exact") add("originality", "Originality", "fail", "Opening or closing paragraph found elsewhere");
     else if (orig === "none") add("originality", "Originality", "pass", "");
     else add("originality", "Originality", "borderline", orig === "partial" ? "Partial match found" : "Not checked yet");

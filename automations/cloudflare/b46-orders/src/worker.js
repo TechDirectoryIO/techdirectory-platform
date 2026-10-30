@@ -203,8 +203,8 @@ async function webRiskSafe(env, u) {
 }
 
 async function originality(env, order) {
-  // Owner decision, 30 October 2026: copied text is allowed (press releases are often published in several places),
-  // so the check is off until ORIGINALITY_CHECK = "on" and Copyscape keys are added.
+  // Owner decision, 30 October 2026: own content only (a company may reuse its own press release), confirmed by the
+  // buyer's tick box; no automatic check until ORIGINALITY_CHECK = "on" and Copyscape keys are added.
   if (env.ORIGINALITY_CHECK !== "on") return "off";
   if (!env.COPYSCAPE_USER || !env.COPYSCAPE_KEY) return undefined; // switched on but not set up -> borderline
   const text = order.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();

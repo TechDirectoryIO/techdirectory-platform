@@ -138,7 +138,7 @@ const reset = () => { calls = []; behaviour = {}; };
   t("Domain remembered: next order with it fails", !!(await env.ORDERS.get("rejdomain:example.com"))); }
 
 { reset(); behaviour.copied = 85; const env = makeEnv(); const { rec } = await placeAndPay(env);
-  t("Copied-text check off by default: a press release published elsewhere still goes live", rec.status === "published" && !hit("copyscape").length); }
+  t("Copied-text check off by default: own press release published elsewhere still goes live", rec.status === "published" && !hit("copyscape").length); }
 
 { reset(); behaviour.copied = 85; const env = makeEnv({ ORIGINALITY_CHECK: "on" }); const { rec } = await placeAndPay(env);
   t("Check switched on: copied article (85% match) refunded", rec.status === "refunded"); }
