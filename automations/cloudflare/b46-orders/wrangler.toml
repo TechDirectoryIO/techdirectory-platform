@@ -12,7 +12,7 @@ workers_dev = true
 
 [[kv_namespaces]]
 binding = "ORDERS"
-id = "SET_AT_GO_LIVE"   # npx wrangler kv namespace create ORDERS
+id = "08eb734181a04f59931b2761c3aee805"   # KV namespace "td-b46-orders", created 30 Oct 2026
 
 [vars]
 SITE_URL = "https://www.techdirectory.io"
@@ -33,12 +33,33 @@ TD_POST_PATH = "/sponsored/"
 ORIGINALITY_CHECK = "off"             # owner, 30 Oct 2026: own content only, buyer confirms; "on" needs Copyscape keys
 ORIGINALITY_FAIL_PCT = "40"            # match elsewhere at or above this: refund
 ORIGINALITY_FLAG_PCT = "10"            # at or above this: owner's queue
-OWNER_EMAIL = "SET_AT_GO_LIVE"
+OWNER_EMAIL = "info@techdirectory.io"     # queue alerts
 SENDER_EMAIL = "info@techdirectory.io"
 
-# Secrets Store bindings (store ID from the Secrets Store page; the secret names match the code)
-# [[secrets_store_secrets]]
-# binding = "BREVO_API_KEY"
-# store_id = "SET_AT_GO_LIVE"
-# secret_name = "BREVO_API_KEY"
-# (repeat for WEB_RISK_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, TD_API_KEY, INDEXNOW_KEY, ADMIN_TOKEN)
+# Keys from Cloudflare's Secrets Store (account level; the owner adds the values, the builder never sees them).
+# Store ID is not a secret. Optional keys (WEB_RISK_KEY, COPYSCAPE_*, INDEXNOW_KEY) are left out until needed.
+
+[[secrets_store_secrets]]
+binding = "BREVO_API_KEY"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "BREVO_API_KEY"
+
+[[secrets_store_secrets]]
+binding = "TD_API_KEY"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "TD_API_KEY"
+
+[[secrets_store_secrets]]
+binding = "STRIPE_SECRET_KEY"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "STRIPE_SECRET_KEY"
+
+[[secrets_store_secrets]]
+binding = "STRIPE_WEBHOOK_SECRET"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "STRIPE_WEBHOOK_SECRET"
+
+[[secrets_store_secrets]]
+binding = "ADMIN_TOKEN"
+store_id = "673c5541e15b4dfa91dc582b08075e28"
+secret_name = "ADMIN_TOKEN"
