@@ -59,7 +59,13 @@ t("'$' keeps /blogger-tools closed to training bots", not ok(NEW, "GPTBot", "loo
 t("Training bots refused on results pages and Data API docs",
   all(not ok(NEW, ua, k) for ua in TRAINING for k in ("results", "category results", "data api docs (future)")))
 t("Bot names match whatever the case", ok(NEW, "gptbot", "blog guide") and not ok(NEW, "GPTBOT", "listing"))
-t("Unlisted bots (e.g. YandexBot) can crawl pages, not /api/", ok(NEW, "YandexBot", "listing") and not ok(NEW, "YandexBot", "api"))
+t("Unnamed bots (data crawlers) refused on listings and results",
+  all(not ok(NEW, ua, k) for ua in ("DataForSeoBot", "AhrefsBot", "SomeScraper/1.0") for k in ("listing", "listing (city)", "results")))
+t("Unnamed bots still get homepage and guides", ok(NEW, "AhrefsBot", "home") and ok(NEW, "AhrefsBot", "blog guide"))
+t("Link previews work on listings (Slack, WhatsApp, LinkedIn)",
+  all(ok(NEW, ua, "listing") for ua in ("Slackbot-LinkExpanding", "WhatsApp", "LinkedInBot")))
+t("IndexNow engines can crawl listings (Yandex, Seznam, Naver)",
+  all(ok(NEW, ua, "listing") for ua in ("YandexBot", "SeznamBot", "Yeti")))
 t("Bots blocked today stay blocked (Baiduspider, PetalBot)", not ok(NEW, "Baiduspider", "home") and not ok(NEW, "PetalBot", "listing"))
 t("Sitemap line present and points to the live index",
   list(NEW.sitemaps) == [S + "/filedata/cache/xml-sitemaps/sitemap.xml"])
@@ -68,7 +74,7 @@ t("Only one 'User-agent: *' group",
 
 # What changes for the main bots (shown, not scored)
 print("What changes, live today -> new (Google-style parser):")
-for ua in ["Googlebot", "Bingbot", "OAI-SearchBot", "PerplexityBot", "Claude-SearchBot", "GPTBot", "ClaudeBot"]:
+for ua in ["Googlebot", "Bingbot", "OAI-SearchBot", "PerplexityBot", "Claude-SearchBot", "GPTBot", "ClaudeBot", "DataForSeoBot"]:
     for k in ("listing", "blog guide"):
         a, b = ok(LIVE, ua, k), ok(NEW, ua, k)
         print(f"  {ua:17} {k:11} {'allowed' if a else 'refused':8} -> {'allowed' if b else 'refused'}{'' if a == b else '   (changed)'}")

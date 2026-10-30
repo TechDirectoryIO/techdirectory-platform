@@ -3,7 +3,9 @@
 #
 # Search and AI answer bots: allowed everywhere except the /api/ endpoint.
 # AI training bots: homepage, guides, Resources and Help Centre only.
-# Bots that ignore this file are handled by Cloudflare (26.4), not here.
+# Any bot not named here gets the same access as training bots, so bulk data
+# crawlers can't read listings. Bots that ignore this file are handled by
+# Cloudflare (26.4): bot fight mode and 60 page views a minute on listings.
 
 Sitemap: https://www.techdirectory.io/filedata/cache/xml-sitemaps/sitemap.xml
 
@@ -17,6 +19,9 @@ User-agent: Msnbot
 User-agent: MSNBot-media
 User-agent: Applebot
 User-agent: DuckDuckBot
+User-agent: YandexBot
+User-agent: SeznamBot
+User-agent: Yeti
 User-agent: Slurp
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
@@ -27,6 +32,11 @@ User-agent: Claude-User
 User-agent: Twitterbot
 User-agent: LinkedInBot
 User-agent: facebookexternalhit
+User-agent: Slackbot
+User-agent: Slackbot-LinkExpanding
+User-agent: WhatsApp
+User-agent: Discordbot
+User-agent: TelegramBot
 Allow: /
 Disallow: /api/
 
@@ -80,8 +90,16 @@ User-agent: magpie-crawler
 User-agent: CitibotSiteCrawler
 Disallow: /
 
-# --- Everyone else ---
+# --- Everyone else: homepage, guides, Resources and Help Centre only ---
 User-agent: *
 Content-Signal: search=yes, ai-input=yes
-Allow: /
-Disallow: /api/
+Allow: /$
+Allow: /blog$
+Allow: /blog/
+Allow: /guides$
+Allow: /guides/
+Allow: /resources$
+Allow: /resources/
+Allow: /help$
+Allow: /help/
+Disallow: /
