@@ -106,3 +106,32 @@ Add-ons: 37 of 79 active. Active: 800+ Google Fonts Pack, Admin Activity Trackin
 - Widget Manager, menus, forms, sidebars, SEO templates and banner zones for the register.
 - Platform support: confirm whether a restore point exists and how long a restore takes; ask about the bandwidth overage.
 - Held for owner approval: 4 test members and the rollback rehearsal (both change the live site).
+
+## Backup and rollback (30 October 2026, 05:31–05:38 UK)
+
+**Host backups already exist.** The hosting control panel keeps daily full-account backups for the last 14 days (16–29 October), weekly ones (4 and 11 October) and monthly ones back to 1 July 2026. This partly answers the restore-point question; platform support has been asked how long a restore takes (ticket #601979, also asking about the bandwidth overage).
+
+**Our own copy (Drive: TD Backups/2026-10-30/):**
+
+| File | Source | Holds |
+| --- | --- | --- |
+| `joac9998_directory.sql.gz` | Hosting control panel, database backup | Members, posts, pages, menus, forms, widgets, custom CSS, email templates, SEO settings, redirects: the whole site database |
+| `joac9998_billing.sql.gz` | Same | Billing records |
+| `joac9998_backups.sql.gz` | Same | The platform's own backup tables |
+| Redirect rules CSV (57,831 rules) | TD admin, 301 Redirect Rules, Export CSV | Redirects as a readable second copy |
+| Member CSV (725,317 members, all 143 fields) | TD admin, Search Members, Export | Still processing in the owner's Chrome (about 20 hours at the measured rate); a second copy only |
+
+Files download to the owner's computer and are moved into the Drive folder by the owner. None of them go in this repository.
+
+**Rollback rehearsal (Build Scope 1.1 step 4): passed.**
+
+| Step | Time (UK) | Result |
+| --- | --- | --- |
+| Customised copy of widget "Bootstrap Theme - Footer - Terms of Use", with one invisible HTML comment added, saved | 05:36:11 | Custom widget #8 |
+| Copy confirmed live on /about | 05:36:46 | 35 seconds |
+| Rollback started (Widget Manager, Actions, Disable Widget) | 05:36:52 | |
+| Original confirmed live on /about | 05:37:50 | **58 seconds**, well inside 15 minutes |
+
+Custom widget #8 is left **disabled, not deleted** (nothing is deleted under Build Scope 29). How to roll back any widget change: Toolbox › Widget Manager › search the widget › Actions › Disable Widget; the default returns within about a minute.
+
+**Test members:** not created. Creating member accounts on the live site is a step the owner does himself; the four accounts to create are "TD Test – Basic", "TD Test – Featured", "TD Test – Premium" and "TD Test – Growth" (the Growth plan does not exist yet, so that one waits for T06).
