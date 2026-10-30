@@ -1,0 +1,7 @@
+{
+  "name": "td-b46-tests",
+  "private": true,
+  "description": "Tests for B46 sponsored-post checks",
+  "scripts": { "test": "node checks.test.js" },
+  "devDependencies": { "dompurify": "3.2.6", "jsdom": "26.1.0" }
+}

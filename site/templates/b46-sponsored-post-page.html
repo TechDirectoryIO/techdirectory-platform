@@ -1,0 +1,271 @@
+<!--
+  B46 · /sponsored-post order page (TD Web Page Builder)
+  Build Scope 28.1, 28.2 steps 4–6, 28.2.1, 28.2.2.
+  Page title: Publish a sponsored post | TechDirectory
+  Meta description: Publish a labelled sponsored post on TechDirectory: $199, paid upfront, live for at least 12 months.
+
+  NOT CONNECTED YET. Before go-live, set TD_SP_CONFIG.orderEndpoint (the order-intake
+  automation) and self-host the editor files (Quill, DOMPurify) and the checks file
+  (site/js/b46-sponsored-checks.js). See docs/tickets/B46.md.
+-->
+<script>
+window.TD_SP_CONFIG = {
+  orderEndpoint: "",            /* order-intake automation URL; empty = page shows "opening soon" */
+  prices: { USD: "$199", GBP: "£159", EUR: "€185" },
+  policyUrl: "/sponsored-content-policy",
+  categories: [
+    ["artificial-intelligence", "Artificial intelligence"], ["cybersecurity", "Cybersecurity"],
+    ["cloud-and-saas", "Cloud and SaaS"], ["software-development", "Software development"],
+    ["it-services", "IT services"], ["data-and-analytics", "Data and analytics"],
+    ["marketing-technology", "Marketing technology"], ["ecommerce-technology", "E-commerce technology"],
+    ["fintech", "Fintech (payments and banking software)"], ["health-technology", "Health technology"],
+    ["hr-technology", "HR technology"], ["telecom-and-connectivity", "Telecom and connectivity"],
+    ["hardware-and-devices", "Hardware and devices"], ["business-technology", "Other business technology"]
+  ]
+};
+</script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+<style>
+  .td-sp{--forest:#202B20;--lime:#9CBB24;--green:#526813;--green-h:#40520F;--teal:#176B68;--ink:#242824;--muted:#596157;--paper:#F6F7F1;
+    --mist:#EDF3D5;--border:#7A877C;--divider:#D8DED6;--err:#B42318;--err-bg:#FFF0EE;--warn:#825500;--warn-bg:#FFF5D8;--info-bg:#EAF5F3;
+    font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55;font-size:16px}
+  .td-sp *{box-sizing:border-box}
+  .td-sp__wrap{max-width:1200px;margin:0 auto;padding:48px 16px 64px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:32px}
+  @media (max-width:960px){.td-sp__wrap{grid-template-columns:1fr}}
+  .td-sp h1,.td-sp h2{font-family:Manrope,Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:-0.03em;color:var(--forest);margin:0}
+  .td-sp h1{font-size:clamp(30px,4vw,44px);line-height:1.12}
+  .td-sp h2{font-size:22px;margin:0 0 12px}
+  .td-sp__lead{font-size:18px;color:var(--muted);margin:12px 0 28px;max-width:62ch}
+  .td-sp__panel{background:#fff;border:1px solid var(--divider);border-radius:12px;padding:24px;margin:0 0 24px}
+  .td-sp label{display:block;font-weight:700;margin:0 0 6px}
+  .td-sp .hint{font-weight:400;color:var(--muted);font-size:14px}
+  .td-sp input[type=text],.td-sp input[type=email],.td-sp input[type=url],.td-sp select{width:100%;min-height:48px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font:inherit;background:#fff;color:var(--ink)}
+  .td-sp__field{margin:0 0 18px}
+  .td-sp__row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:640px){.td-sp__row{grid-template-columns:1fr}}
+  .td-sp :focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+  .td-sp #td-sp-editor{min-height:420px;font-size:16px}
+  .td-sp .ql-toolbar.ql-snow,.td-sp .ql-container.ql-snow{border-color:var(--border)}
+  .td-sp .ql-toolbar.ql-snow{border-radius:8px 8px 0 0}.td-sp .ql-container.ql-snow{border-radius:0 0 8px 8px}
+  .td-sp__meter{display:flex;flex-wrap:wrap;gap:8px 16px;margin:10px 0 0;font-size:14px}
+  .td-sp__pill{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
+  .td-sp__pill--ok{background:var(--mist);color:var(--green)}.td-sp__pill--warn{background:var(--warn-bg);color:var(--warn)}.td-sp__pill--bad{background:var(--err-bg);color:var(--err)}
+  .td-sp__checks{list-style:none;margin:0;padding:0}
+  .td-sp__checks li{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--divider);font-size:15px}
+  .td-sp__checks li:last-child{border:0}
+  .td-sp__checks b{min-width:9.5em}
+  .td-sp__price{font-family:Manrope,Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:-0.045em;font-size:56px;line-height:1;color:var(--forest);margin:8px 0}
+  .td-sp__aside ul{padding-left:18px;margin:8px 0 0}.td-sp__aside li{margin:4px 0}
+  .td-sp__label{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--border);font-size:13px;font-weight:700;background:#fff}
+  .td-sp__btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 28px;border-radius:8px;border:1px solid transparent;background:var(--green);color:#fff;font:700 17px Arial,Helvetica,sans-serif;cursor:pointer;width:100%}
+  .td-sp__btn:hover{background:var(--green-h)}.td-sp__btn[disabled]{background:#9AA59A;cursor:not-allowed}
+  .td-sp__consent{display:flex;gap:10px;align-items:flex-start;font-weight:400}
+  .td-sp__consent input{width:22px;height:22px;margin-top:2px;flex:none}
+  .td-sp__error{color:var(--err);font-size:14px;margin:6px 0 0}
+  .td-sp__note{font-size:14px;color:var(--muted);margin:12px 0 0}
+  .td-sp__status{padding:12px 16px;border-radius:8px;margin:0 0 16px;font-size:15px}
+  .td-sp__status--info{background:var(--info-bg);color:var(--teal)}.td-sp__status--warn{background:var(--warn-bg);color:var(--warn)}
+  .td-sp a{color:var(--green);text-underline-offset:2px}
+</style>
+
+<div class="td-sp">
+  <div class="td-sp__wrap">
+    <main>
+      <h1>Publish a sponsored post</h1>
+      <p class="td-sp__lead">Write your article here, check it against our publishing rules as you go, then pay. If it passes every check, it goes live within minutes.</p>
+
+      <div id="td-sp-status" class="td-sp__status td-sp__status--info" role="status" hidden></div>
+
+      <form id="td-sp-form" novalidate>
+        <section class="td-sp__panel" aria-labelledby="td-sp-you">
+          <h2 id="td-sp-you">About you</h2>
+          <div class="td-sp__row">
+            <div class="td-sp__field"><label for="sp-name">Your name</label><input id="sp-name" name="name" type="text" autocomplete="name" required></div>
+            <div class="td-sp__field"><label for="sp-email">Work email</label><input id="sp-email" name="email" type="email" autocomplete="email" required></div>
+          </div>
+          <div class="td-sp__row">
+            <div class="td-sp__field"><label for="sp-company">Company name</label><input id="sp-company" name="company" type="text" autocomplete="organization" required></div>
+            <div class="td-sp__field"><label for="sp-site">Your website <span class="hint">(links may point only here)</span></label><input id="sp-site" name="website" type="url" placeholder="https://" required></div>
+          </div>
+        </section>
+
+        <section class="td-sp__panel" aria-labelledby="td-sp-article">
+          <h2 id="td-sp-article">Your article</h2>
+          <div class="td-sp__field"><label for="sp-title">Title</label><input id="sp-title" name="title" type="text" maxlength="120" required></div>
+          <div class="td-sp__field">
+            <label for="sp-category">Category</label>
+            <select id="sp-category" name="category" required><option value="">Choose a technology category</option></select>
+          </div>
+          <div class="td-sp__field">
+            <label id="sp-body-label">Article <span class="hint">600–1,500 words, up to 2 links to your own site, at least one subheading</span></label>
+            <div id="td-sp-editor" aria-labelledby="sp-body-label"></div>
+            <div class="td-sp__meter" aria-live="polite">
+              <span id="sp-words" class="td-sp__pill td-sp__pill--warn">0 words</span>
+              <span id="sp-links" class="td-sp__pill td-sp__pill--ok">0 of 2 links</span>
+              <span id="sp-saved" class="hint"></span>
+            </div>
+            <p class="td-sp__note">Paste from Word or Google Docs keeps headings, lists and links. Every link is marked <code>rel="sponsored"</code> automatically.</p>
+          </div>
+          <div class="td-sp__field">
+            <label for="sp-image">Featured image <span class="hint">JPG, PNG or WebP, at least 1,200 px wide, 2 MB or less, that you have the right to use</span></label>
+            <input id="sp-image" name="image" type="file" accept="image/jpeg,image/png,image/webp">
+            <p id="sp-image-msg" class="td-sp__note"></p>
+          </div>
+          <div class="td-sp__field"><label for="sp-alt">Image description (alt text)</label><input id="sp-alt" name="imageAlt" type="text" maxlength="160"></div>
+        </section>
+
+        <section class="td-sp__panel" aria-labelledby="td-sp-checks-h">
+          <h2 id="td-sp-checks-h">Publishing checks</h2>
+          <p class="td-sp__note" style="margin-top:0">These update as you write. Link safety and originality are checked after you pay.</p>
+          <ul id="td-sp-checks" class="td-sp__checks"></ul>
+        </section>
+
+        <section class="td-sp__panel">
+          <label class="td-sp__consent"><input id="sp-consent" type="checkbox" required>
+            <span>I have read and accept the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>. My article is original, I have the right to use its image, and I understand it will be labelled "Sponsored".</span></label>
+          <p id="sp-form-error" class="td-sp__error" role="alert"></p>
+          <button id="sp-submit" class="td-sp__btn" type="submit"><span>Pay <span data-td-price>$199</span> and submit</span></button>
+          <p class="td-sp__note"><b>Refunds.</b> If your post fails our checks or we decline it, you get a full refund automatically. If we remove a published post within 12 months for a reason that isn't yours, you also get a full refund. No refunds once a post is live and meets the <a href="/sponsored-content-policy" target="_blank">sponsored content policy</a>.</p>
+        </section>
+      </form>
+    </main>
+
+    <aside class="td-sp__aside">
+      <div class="td-sp__panel">
+        <span class="td-sp__label">Sponsored</span>
+        <div class="td-sp__price" data-td-price>$199</div>
+        <p style="margin:0" class="hint">per post, before tax, paid upfront</p>
+        <p style="margin:12px 0 0"><label for="sp-currency" style="display:inline;font-weight:400">Currency</label>
+          <select id="sp-currency" style="width:auto;min-height:40px;margin-left:8px"><option value="USD">US dollars</option><option value="GBP">Pounds</option><option value="EUR">Euros</option></select></p>
+        <ul>
+          <li>Labelled "Sponsored", with your company as the byline</li>
+          <li>Up to 2 links to your own site, marked <code>rel="sponsored"</code></li>
+          <li>Live for at least 12 months</li>
+          <li>Technology and business-technology topics only</li>
+          <li>Published within minutes when every check passes</li>
+        </ul>
+      </div>
+      <div class="td-sp__panel">
+        <h2 style="font-size:18px">Not accepted</h2>
+        <p class="hint" style="margin:0">Gambling, adult content, crypto-assets, investments, loans, credit or insurance, CBD or drugs, weapons, hacking, essay writing, fake reviews and health claims. We don't insert links into existing posts.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+<script src="/td-assets/b46-sponsored-checks.js"></script>
+<script>
+(function () {
+  var cfg = window.TD_SP_CONFIG, $ = function (id) { return document.getElementById(id); };
+  var DRAFT_KEY = "td-sp-draft-v1";
+  var imageInfo = { width: 0, name: "", ok: false, file: null };
+
+  cfg.categories.forEach(function (c) { var o = document.createElement("option"); o.value = c[0]; o.textContent = c[1]; $("sp-category").appendChild(o); });
+
+  /* currency: visitor's choice, kept for this visitor only */
+  function setCurrency(cur) {
+    var p = cfg.prices[cur] || cfg.prices.USD;
+    document.querySelectorAll("[data-td-price]").forEach(function (el) { el.textContent = p; });
+    try { localStorage.setItem("td-currency", cur); } catch (e) {}
+  }
+  var cur0 = "USD"; try { cur0 = localStorage.getItem("td-currency") || "USD"; } catch (e) {}
+  $("sp-currency").value = cur0; setCurrency(cur0);
+  $("sp-currency").addEventListener("change", function () { setCurrency(this.value); });
+
+  var quill = new Quill("#td-sp-editor", {
+    theme: "snow",
+    placeholder: "Write or paste your article…",
+    modules: { toolbar: [[{ header: 2 }, { header: 3 }], ["bold", "italic"], ["link"], [{ list: "ordered" }, { list: "bullet" }], ["blockquote"], ["clean"]],
+               history: { delay: 800, maxStack: 200 } },
+    formats: ["header", "bold", "italic", "link", "list", "blockquote"]
+  });
+
+  function articleHtml() { return quill.getSemanticHTML ? quill.getSemanticHTML() : quill.root.innerHTML; }
+  function domains() { try { return [new URL($("sp-site").value).hostname.replace(/^www\./, "")]; } catch (e) { return []; } }
+
+  function evaluate() {
+    var r = TDSponsoredChecks.run({ title: $("sp-title").value, html: articleHtml(), category: $("sp-category").value,
+      buyerDomains: domains(), image: imageInfo, network: null, history: { refusals12m: 0 } }, DOMPurify);
+    var wEl = $("sp-words"), lEl = $("sp-links");
+    wEl.textContent = r.words.toLocaleString("en-GB") + " words";
+    wEl.className = "td-sp__pill td-sp__pill--" + (r.words >= 600 && r.words <= 1500 ? "ok" : (r.words < 450 || r.words > 2000) ? "bad" : "warn");
+    lEl.textContent = r.links.length + " of 2 links";
+    lEl.className = "td-sp__pill td-sp__pill--" + (r.links.length <= 2 ? "ok" : "bad");
+    var shown = r.checks.filter(function (c) { return c.id !== "safety" && c.id !== "originality" && c.id !== "history"; });
+    var labels = { pass: ["ok", "Passes"], borderline: ["warn", "Needs a look"], fail: ["bad", "Will be refused"] };
+    $("td-sp-checks").innerHTML = shown.map(function (c) {
+      var l = labels[c.result];
+      return '<li><b>' + c.label + '</b><span class="td-sp__pill td-sp__pill--' + l[0] + '">' + l[1] + "</span><span>" +
+        (c.detail ? c.detail.replace(/[<>&]/g, "") : "") + "</span></li>";
+    }).join("");
+    return r;
+  }
+
+  /* draft kept in this browser while the writer works (Build Scope 28.2.2) */
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ title: $("sp-title").value, category: $("sp-category").value, html: articleHtml(),
+        name: $("sp-name").value, email: $("sp-email").value, company: $("sp-company").value, website: $("sp-site").value, alt: $("sp-alt").value }));
+      $("sp-saved").textContent = "Draft saved in this browser";
+    } catch (e) {}
+  }
+  try {
+    var d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+    if (d) { ["title", "category", "name", "email", "company"].forEach(function (k) { if (d[k]) $("sp-" + k).value = d[k]; });
+      if (d.website) $("sp-site").value = d.website; if (d.alt) $("sp-alt").value = d.alt;
+      if (d.html) quill.clipboard.dangerouslyPasteHTML(DOMPurify.sanitize(d.html)); }
+  } catch (e) {}
+
+  var t;
+  function changed() { clearTimeout(t); t = setTimeout(function () { evaluate(); saveDraft(); }, 300); }
+  quill.on("text-change", changed);
+  ["sp-title", "sp-category", "sp-site", "sp-name", "sp-email", "sp-company", "sp-alt"].forEach(function (id) { $(id).addEventListener("input", changed); });
+
+  $("sp-image").addEventListener("change", function () {
+    var f = this.files && this.files[0], msg = $("sp-image-msg");
+    imageInfo = { width: 0, name: f ? f.name : "", ok: false, file: f || null };
+    if (!f) { msg.textContent = ""; evaluate(); return; }
+    if (f.size > 2 * 1024 * 1024) { msg.textContent = "This image is larger than 2 MB."; msg.style.color = "#B42318"; evaluate(); return; }
+    var img = new Image(); img.onload = function () {
+      imageInfo.width = img.naturalWidth; imageInfo.ok = img.naturalWidth >= 1200;
+      msg.textContent = img.naturalWidth + " × " + img.naturalHeight + " px" + (imageInfo.ok ? "" : " (needs to be at least 1,200 px wide)");
+      msg.style.color = imageInfo.ok ? "" : "#825500"; URL.revokeObjectURL(img.src); evaluate();
+    };
+    img.src = URL.createObjectURL(f);
+  });
+
+  function status(text, kind) { var s = $("td-sp-status"); s.hidden = !text; s.textContent = text || ""; s.className = "td-sp__status td-sp__status--" + (kind || "info"); }
+  if (!cfg.orderEndpoint) status("Ordering opens soon. You can write and check your article now; your draft is saved in this browser.", "warn");
+
+  $("td-sp-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("sp-form-error"); err.textContent = "";
+    var r = evaluate();
+    var missing = ["sp-name", "sp-email", "sp-company", "sp-site", "sp-title", "sp-category"].filter(function (id) { return !$(id).value.trim(); });
+    if (missing.length) { err.textContent = "Please fill in every field above."; $(missing[0]).focus(); return; }
+    if (!imageInfo.file || !imageInfo.ok) { err.textContent = "Please add a featured image at least 1,200 px wide."; $("sp-image").focus(); return; }
+    if (!$("sp-alt").value.trim()) { err.textContent = "Please describe the image for people who can't see it."; $("sp-alt").focus(); return; }
+    if (!$("sp-consent").checked) { err.textContent = "Please accept the sponsored content policy."; $("sp-consent").focus(); return; }
+    if (r.result === "fail") { err.textContent = "Your article would be refused as it stands. Fix the checks marked \"Will be refused\" first."; return; }
+    if (!cfg.orderEndpoint) { err.textContent = "Ordering opens soon. Your draft is saved in this browser."; return; }
+
+    var btn = $("sp-submit"); btn.disabled = true; btn.textContent = "Taking you to secure payment…";
+    var fd = new FormData();
+    fd.append("name", $("sp-name").value); fd.append("email", $("sp-email").value); fd.append("company", $("sp-company").value);
+    fd.append("website", $("sp-site").value); fd.append("title", $("sp-title").value); fd.append("category", $("sp-category").value);
+    fd.append("html", r.cleanHtml); fd.append("imageAlt", $("sp-alt").value); fd.append("image", imageInfo.file);
+    fd.append("currency", $("sp-currency").value); fd.append("policyAccepted", new Date().toISOString());
+    fetch(cfg.orderEndpoint, { method: "POST", body: fd }).then(function (res) { return res.json(); }).then(function (j) {
+      if (j && j.checkoutUrl) { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} window.location.href = j.checkoutUrl; }
+      else throw new Error("no checkout");
+    }).catch(function () {
+      btn.disabled = false; btn.innerHTML = '<span>Pay <span data-td-price></span> and submit</span>'; setCurrency($("sp-currency").value);
+      err.textContent = "Something went wrong and you have not been charged. Your draft is saved; please try again in a few minutes.";
+    });
+  });
+
+  evaluate();
+})();
+</script>
