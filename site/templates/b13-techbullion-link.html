@@ -1,0 +1,167 @@
+<!--
+  B13 · TechBullion link · TD widget "TD TechBullion Link v1"
+  Build Scope 19. One settings block for every placement.
+
+  HOW IT WORKS
+  - Paste this whole file into a new TD custom widget named "TD TechBullion Link v1".
+  - Each placement adds ONE slot followed by the widget shortcode, for example:
+        <div data-td-tb="panel" data-placement="pricing"></div>
+        [widget=TD TechBullion Link v1]
+    Variants: "panel" (full forest panel), "strip" (dashboard strip), "line" (one line).
+    Placements: publishing-page, publishing-tab, pricing, homepage, overview, announcement.
+  - The footer "Publishing" link is a normal menu item to /publishing; it is hidden
+    automatically when the switch is off.
+
+  EDIT ONLY THE SETTINGS BLOCK BELOW. Every placement reads it.
+  Switch off: set on to false and save. Every placement disappears at once.
+  Remove completely: see docs/tickets/B13.md (Removing it).
+-->
+<script>
+window.TD_TB_SETTINGS = window.TD_TB_SETTINGS || {
+  on: true,                                   /* false hides every placement at once */
+  link: "https://techbullion.com/media-kit",  /* utm tags are added per placement */
+  buttonText: "Publish on TechBullion",
+  heading: "Get your news published on TechBullion",
+  description: "Create your publishing account once, then buy online and publish when you are ready.",
+  prices: [
+    { name: "Sponsored article", price: "$600", note: "Written by you or your agency, published on TechBullion and labelled as sponsored content." },
+    { name: "Press release",     price: "$500", note: "Published in TechBullion's Press Releases section and labelled as a press release." }
+  ],
+  referralCode: "",        /* shown only if a referral arrangement is agreed, e.g. "TD10" */
+  endDate: "",             /* "YYYY-MM-DD": after this date every placement hides itself */
+  placements: ["publishing-page", "publishing-tab", "pricing", "homepage", "overview", "announcement", "footer"]
+};
+</script>
+
+<style>
+  .td-tb{--tb-forest:#202B20;--tb-raised:#2C382A;--tb-lime:#9CBB24;--tb-text2:#C6CFBE;--tb-link:#B9D45D;--tb-border:#A5B19F;
+    font-family:Arial,Helvetica,sans-serif;color:#FFFFFF;background:var(--tb-forest);border-radius:12px;box-sizing:border-box;line-height:1.55;text-align:left}
+  .td-tb *{box-sizing:border-box}
+  .td-tb--panel{padding:40px 32px;margin:32px 0}
+  .td-tb--strip{padding:20px 24px;margin:24px 0;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px}
+  .td-tb--line{background:transparent;color:inherit;padding:0;margin:12px 0;font-size:15px}
+  .td-tb__chip{display:inline-flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;border:1px solid var(--tb-border);color:#FFFFFF;font-size:13px;font-weight:700;letter-spacing:.01em}
+  .td-tb__chip span{display:inline-block;width:18px;height:18px;border-radius:50%;background:#FFFFFF;color:#0B2A4A;font-weight:800;font-size:12px;line-height:18px;text-align:center}
+  .td-tb__h{font-family:Manrope,Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:-0.03em;font-size:clamp(26px,3.4vw,36px);line-height:1.15;margin:16px 0 8px;color:#FFFFFF}
+  .td-tb__p{margin:0 0 24px;color:var(--tb-text2);font-size:17px;max-width:62ch}
+  .td-tb__cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:0 0 28px}
+  .td-tb__card{background:var(--tb-raised);border:1px solid var(--tb-border);border-radius:12px;padding:24px}
+  .td-tb__name{font-weight:700;font-size:17px;margin:0}
+  .td-tb__price{font-family:Manrope,Arial,Helvetica,sans-serif;font-weight:800;letter-spacing:-0.045em;font-size:56px;line-height:1.05;margin:8px 0;color:#FFFFFF}
+  .td-tb__note{margin:0;color:var(--tb-text2);font-size:15px}
+  .td-tb__btn{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 28px;border-radius:8px;background:var(--tb-lime);color:var(--tb-forest);border:1px solid var(--tb-forest);font-weight:700;font-size:17px;text-decoration:none}
+  .td-tb--strip .td-tb__btn{min-height:48px;font-size:16px;padding:0 22px}
+  .td-tb__btn:hover{background:#B9D45D;color:var(--tb-forest)}
+  .td-tb a:focus-visible{outline:3px solid var(--tb-lime);outline-offset:2px}
+  .td-tb__btn:focus-visible{outline-color:#FFFFFF}
+  .td-tb__opens{display:block;margin-top:8px;font-size:13px;color:var(--tb-text2)}
+  .td-tb__small{margin:20px 0 0;font-size:13px;color:var(--tb-text2);max-width:72ch}
+  .td-tb__strip-text{flex:1 1 320px;margin:0;font-size:16px;color:#FFFFFF}
+  .td-tb__strip-text b{font-family:Manrope,Arial,Helvetica,sans-serif;font-weight:800}
+  .td-tb--line a{color:#526813;text-decoration:underline;text-underline-offset:2px}
+  [data-td-tb]:empty{display:none}
+  @media (max-width:640px){.td-tb--panel{padding:28px 16px}.td-tb__price{font-size:44px}.td-tb__btn{width:100%}}
+</style>
+
+<script>
+(function () {
+  if (window.TD_TB_RENDERER) { window.TD_TB_RENDERER(); return; }
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  function active(cfg) {
+    if (!cfg || !cfg.on) return false;
+    if (cfg.endDate) {
+      var end = new Date(cfg.endDate + "T23:59:59");
+      if (!isNaN(end) && Date.now() > end.getTime()) return false;
+    }
+    return true;
+  }
+
+  function linkFor(cfg, placement) {
+    var u = cfg.link;
+    var sep = u.indexOf("?") === -1 ? "?" : "&";
+    return u + sep + "utm_source=techdirectory&utm_medium=" + encodeURIComponent(placement) + "&utm_campaign=publishing";
+  }
+
+  function a(cfg, placement, cls, text) {
+    return '<a class="' + cls + '" href="' + esc(linkFor(cfg, placement)) + '" target="_blank" rel="sponsored noopener"' +
+      ' data-td-tb-click="' + esc(placement) + '" aria-label="' + esc(text) + ' (opens TechBullion.com in a new tab)">' + esc(text) + '</a>';
+  }
+
+  var CHIP = '<span class="td-tb__chip"><span aria-hidden="true">T</span>TechBullion</span>';
+
+  function disclosure(cfg) {
+    var ref = cfg.referralCode ? " Use code <b>" + esc(cfg.referralCode) + "</b> at checkout." : "";
+    return '<p class="td-tb__small">Ordered and paid on TechBullion.com. Prices are set by TechBullion in US dollars. ' +
+      "Paid content on TechBullion is labelled, and TechBullion's editors review each piece and may decline it. " +
+      "TechDirectory does not review or endorse it." + ref + "</p>";
+  }
+
+  var views = {
+    panel: function (cfg, p) {
+      var cards = (cfg.prices || []).map(function (x) {
+        return '<div class="td-tb__card"><p class="td-tb__name">' + esc(x.name) + '</p><p class="td-tb__price">' + esc(x.price) +
+          '</p><p class="td-tb__note">' + esc(x.note) + "</p></div>";
+      }).join("");
+      return CHIP + '<h2 class="td-tb__h">' + esc(cfg.heading) + '</h2><p class="td-tb__p">' + esc(cfg.description) + "</p>" +
+        '<div class="td-tb__cards">' + cards + "</div>" + a(cfg, p, "td-tb__btn", cfg.buttonText) +
+        '<span class="td-tb__opens">Opens TechBullion.com</span>' + disclosure(cfg);
+    },
+    strip: function (cfg, p) {
+      var prices = (cfg.prices || []).map(function (x) { return esc(x.name) + " <b>" + esc(x.price) + "</b>"; }).join(" · ");
+      return CHIP + '<p class="td-tb__strip-text">' + esc(cfg.heading) + ": " + prices + "</p>" + a(cfg, p, "td-tb__btn", cfg.buttonText);
+    },
+    line: function (cfg, p) {
+      var from = (cfg.prices || []).map(function (x) { return parseFloat(String(x.price).replace(/[^0-9.]/g, "")); })
+        .filter(function (n) { return !isNaN(n); });
+      var min = from.length ? "$" + Math.min.apply(null, from) : "";
+      return "For a TechBullion sponsored article or press release (from " + esc(min) + "), " +
+        a(cfg, p, "", "see TechBullion's options") + " (opens TechBullion.com).";
+    }
+  };
+
+  function render() {
+    var cfg = window.TD_TB_SETTINGS;
+    var on = active(cfg);
+    var slots = document.querySelectorAll("[data-td-tb]");
+    var seen = {};
+    for (var i = 0; i < slots.length; i++) {
+      var el = slots[i];
+      var variant = el.getAttribute("data-td-tb");
+      var placement = el.getAttribute("data-placement") || "unknown";
+      var allowed = on && cfg.placements.indexOf(placement) !== -1 && views[variant];
+      /* at most one TechBullion panel or strip per page */
+      var key = variant === "line" ? "line" : "block";
+      if (!allowed || seen[key]) { el.innerHTML = ""; el.removeAttribute("class"); el.hidden = true; continue; }
+      seen[key] = true;
+      el.hidden = false;
+      el.className = "td-tb td-tb--" + variant;
+      el.setAttribute("data-nosnippet", "");
+      el.setAttribute("role", "region");
+      el.setAttribute("aria-label", "TechBullion publishing");
+      el.innerHTML = views[variant](cfg, placement);
+    }
+    /* footer "Publishing" menu link follows the switch */
+    var footerOn = on && cfg.placements.indexOf("footer") !== -1;
+    var links = document.querySelectorAll('a[href="/publishing"], a[href$="techdirectory.io/publishing"]');
+    for (var j = 0; j < links.length; j++) {
+      var li = links[j].closest("li") || links[j];
+      li.style.display = footerOn ? "" : "none";
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target && e.target.closest ? e.target.closest("[data-td-tb-click]") : null;
+    if (!t) return;
+    /* GA4 event; sent only where analytics is loaded (after cookie consent once B05 is live) */
+    if (typeof window.gtag === "function") {
+      window.gtag("event", "td_publishing_click", { placement: t.getAttribute("data-td-tb-click") });
+    }
+  });
+
+  window.TD_TB_RENDERER = render;
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render); else render();
+})();
+</script>
